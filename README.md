@@ -14,8 +14,19 @@
 - multiprocess
 
 安装:
-```Python
+```
 pip3 install requests
 pip3 install pyquery
 pip3 install multiprocess
+```
+
+使用:
+- 需要修改下载路径
+- 解析代码换一换就可以直接套在别的站点了
+
+运行:
+```
+python3 hswyc.py
+/
+python3 yxanimetion.py
 ```
