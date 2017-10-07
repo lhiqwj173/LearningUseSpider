@@ -6,15 +6,14 @@
 # @File    : hswyc.py
 # @Software: PyCharm Community Edition
 
-import requests
-from pyquery import PyQuery as pq
-import os, multiprocessing
+import os, multiprocessing,requests
+
 from multiprocessing import Pool
+from pyquery import PyQuery as pq
 
 class Hswyc:
 
     def __init__(self):
-
         self._domain = 'http://www.verydm.com'
         self._starturl = 'http://www.verydm.com/manhua/heisewuyecao'
         self._eachpart = []
