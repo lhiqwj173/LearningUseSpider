@@ -10,6 +10,7 @@ import os, multiprocessing,requests
 
 from multiprocessing import Pool
 from pyquery import PyQuery as pq
+from datetime import datetime
 
 class Hswyc:
 
@@ -18,6 +19,7 @@ class Hswyc:
         self._starturl = 'http://www.verydm.com/manhua/heisewuyecao'
         self._eachpart = []
         self._eachpage = []
+        self._time = datetime.now()
         self._total = 0
         self._path = '/Users/Anzeme 1/Pictures/heisewuyecao/'
 
@@ -34,7 +36,8 @@ class Hswyc:
     def part_parse(self, url):
         pagec = pq(self.html_text(url))('.pagination')('a').eq(-2).html().split('.')[-1]
         for c in range(1,int(pagec)+1):
-            self._eachpage.append('%s&p=%s' %(url, c))
+            full_url = '%s&p=%s' %(url, c)
+            self.img_save(full_url)
 
     def img_save(self, url):
         jpgurl = pq(self.html_text(url))('#mainImage2').attr('src')
@@ -54,15 +57,15 @@ class Hswyc:
 
     def start(self):
         self.index_parse()
-        for href in self._eachpart:
-            self.part_parse(href)
-        print('Find %s manga' %len(self._eachpage))
         print("Starting downloading")
-
         p = Pool(multiprocessing.cpu_count())
-        p.map(self.img_save, self._eachpage)
+        p.map(self.part_parse, self._eachpart)
+        end = datetime.now()
+        use_time = self._time - end
+        print("Spend %s seconds" %use_time)
+        print("All downloading is done. Have Fun")
 
 if __name__ == '__main__':
     h = Hswyc()
     h.start()
-    print("All downloading is done. Have Fun")
+    
