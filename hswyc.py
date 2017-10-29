@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # @Time    : 2017/10/4 16:23
 # @Author  : Aries
-# @Site    : anzeme.cn
+# @Site    : anzeme.com
 # @File    : hswyc.py
 # @Software: PyCharm Community Edition
 
