@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # @Date    : 2017-09-10 16:51:03
 # @Author  : Anzeme (foxlowm@foxmail.com)
-# @Link    : anzeme.cn
+# @Link    : anzeme.com
 # @Version : $Id$
 
 import multiprocessing
