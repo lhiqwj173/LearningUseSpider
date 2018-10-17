@@ -30,3 +30,20 @@ python3 hswyc.py
 /
 python3 yxanimetion.py
 ```
+
+# asyncio库的使用
+依赖
+```
+- aiofiles
+- aiohttp
+- uvloop
+```
+使用:
+- 网址
+- 路径
+
+运行:
+```
+python3 .py url path
+```
+
