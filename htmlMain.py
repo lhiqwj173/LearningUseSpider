@@ -40,29 +40,16 @@ async def product(q):
             await q.put(_)
             print('生产者 ==> 已放入 {}'.format(_))
 
-        """队列完成，添加中止信号"""
-        for i in range(4):
-            await q.put(None)
-
-        print("已全部生产完毕，开始阻塞队列")
-        await q.join()
-        print("生产结束，等待程序中止")
-
-
 async def consume(q, i):
     """消费函数，队列取值进行下载"""
     async with aiohttp.ClientSession() as session:
         """开始提取链接"""
         while True:
-            """每次提取结束发送完成信号"""
             link = await q.get()
             print("协程 {} 开始提取链接 {}".format(i, link))
-            if link is None:
-                q.task_done()
+            await downloader(link, session, path_name)
+            if q.empty():
                 break
-            else:
-                await downloader(link, session, path_name)
-                q.task_done()
 
         print("协程 {} 号已完成任务".format(i))
 
