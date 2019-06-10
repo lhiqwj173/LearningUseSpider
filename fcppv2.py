@@ -1,4 +1,4 @@
-import asyncio, aiohttp, aiofiles, re
+import asyncio, aiohttp, aiofiles, re, os
 from pyquery import PyQuery as pq
 
 #主页
@@ -41,7 +41,9 @@ async def requestFirstUrl(url, duilie, session):
         #print(f'{fcppvLink}\t{fcppvTitle}')
 
 #请求本体页面并查找图片链接与磁力下载
-async def downloadImg(duilie, session):
+async def downloadImg(duilie, session, tag):
+    if not os.path.exists(f'{tag}'):
+        os.mkdir(f'{tag}')
     while True:
         #异步取链接
         link = await duilie.get()
@@ -56,11 +58,11 @@ async def downloadImg(duilie, session):
         print(f'{imgName}\t{torrentLink}')
         #发现经常会在此卡死，怀疑是读写出了问题，进行错误捕获处理
         try:
-            async with aiofiles.open(f'chinese/{imgName}', 'wb') as imgwriter:
+            async with aiofiles.open(f'{tag}/{imgName}', 'wb') as imgwriter:
                 #所有异步操作都需await等待
                 data = await fetch(imgLink, session, data=True)
                 await imgwriter.write(data)
-            async with aiofiles.open('chinese/magnet.txt', 'w+') as linkwrite:
+            async with aiofiles.open(f'{tag}/magnet.txt', 'a+') as linkwrite:
                 await linkwrite.write(f'{link[-1]}\t{torrentLink}\n')
         except:
             continue
@@ -71,13 +73,17 @@ async def downloadImg(duilie, session):
 #主函数
 async def main():
     #创建队列
-    q = asyncio.Queue(maxsize=16)
+    number = input('Please choose one you want download:\n1: fcppv\n2: blowjob\n3: footjob\n4: allInOne\n5: anime\n6: chinese\n')
+    tagDict = {'1':fcppv, '2':blowjob, '3':footjob, '4':allInOne, '5':anime, '6':chinese}
+    tagDictTmp = {'1':'fcppv', '2':'blowjob', '3':'footjob', '4':'allInOne', '5':'anime', '6':'chinese'}
+    q = asyncio.Queue(maxsize=8)
     #aiohttp官方建议只开启单个session用以复用
     async with aiohttp.ClientSession() as session:
-        for url in chinese:
+        for url in tagDict[number]:
             #创建task
             task1 = [asyncio.create_task(requestFirstUrl(url, q, session))]
-            task2 = [asyncio.create_task(downloadImg(q, session))]
+            task2 = [asyncio.create_task(downloadImg(q, session, tagDictTmp[number])) for _ in range(8)]
             await asyncio.wait(task1+task2)
+
 
 asyncio.run(main())
