@@ -5,13 +5,13 @@ from pyquery import PyQuery as pq
 urlFormat = 'https://www.sehuatang.net/{}'
 
 #fcppv链接
-fcppv = ['https://www.sehuatang.net/forum.php?mod=forumdisplay&fid=36&typeid=368&filter=typeid&typeid=368&page=%s' %i for i in range(1,51)]
+fcppv = ['https://www.sehuatang.net/forum.php?mod=forumdisplay&fid=36&typeid=368&filter=typeid&page=%s' %i for i in range(1,51)]
 
 #口
 blowjob = ['https://www.sehuatang.net/forum.php?mod=forumdisplay&fid=36&filter=typeid&typeid=591&page=%s' %i for i in range(1,6)]
 
 #足
-footjob = ['https://www.sehuatang.net/forum.php?mod=forumdisplay&fid=37&filter=typeid&typeid=589&page=%s' %i for i in range(1,6)]
+footjob = ['https://www.sehuatang.net/forum.php?mod=forumdisplay&fid=36&filter=typeid&typeid=589&page=%s' %i for i in range(1,6)]
 
 #每日合集
 allInOne = ['https://www.sehuatang.net/forum-106-%s.html' %i for i in range(1,7)]
@@ -47,6 +47,7 @@ async def downloadImg(duilie, session, tag):
     while True:
         #异步取链接
         link = await duilie.get()
+        print(link)
         try:
             htmlData = await fetch(link[0], session)
             imgLink = pq(htmlData)('.zoom').attr('file')
@@ -84,6 +85,5 @@ async def main():
             task1 = [asyncio.create_task(requestFirstUrl(url, q, session))]
             task2 = [asyncio.create_task(downloadImg(q, session, tagDictTmp[number])) for _ in range(8)]
             await asyncio.wait(task1+task2)
-
 
 asyncio.run(main())
