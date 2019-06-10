@@ -34,8 +34,11 @@ python3 yxanimetion.py
 # asyncio库的使用
 
 自python3.6后，异步框架以得官方扶正，我也很少再用request同步模块了
+
 aiohttp是request的异步架构
+
 aiofiles虽然说是异步读写，但听说速度不比同步快多少
+
 异步框架基本采取生产者消费者模式，创建队列，入与取。
 
 依赖
