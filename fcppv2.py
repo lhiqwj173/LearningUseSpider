@@ -31,17 +31,20 @@ async def fetch(url, session, data=False):
                 return await response.read()
             return await response.text()
     except:
-        pass
+        print("Fetch error")
 #请求每一页，将目标链接放入异步队列
 async def requestFirstUrl(url, duilie, session):
     htmlData = await fetch(url, session) 
-    pqa = pq(htmlData)('.s.xst')
-    for _ in pqa:
-        fcppvLink = urlFormat.format(pq(_)('a').attr('href'))
-        fcppvTitle = pq(_)('a').text()
-        #由于放入操作是异步，需使用await，这里一并放入标题，方便后续使用
-        await duilie.put([fcppvLink, fcppvTitle])
-        #print(f'{fcppvLink}\t{fcppvTitle}')
+    try:
+        pqa = pq(htmlData)('.s.xst')
+        for _ in pqa:
+            fcppvLink = urlFormat.format(pq(_)('a').attr('href'))
+            fcppvTitle = pq(_)('a').text()
+            #由于放入操作是异步，需使用await，这里一并放入标题，方便后续使用
+            await duilie.put([fcppvLink, fcppvTitle])
+            #print(f'{fcppvLink}\t{fcppvTitle}')
+    except:
+        print("request Put error")
 
 #请求本体页面并查找图片链接与磁力下载
 async def downloadImg(duilie, session, tag):
@@ -60,7 +63,7 @@ async def downloadImg(duilie, session, tag):
             torrentLink = pq(htmlData)('div .blockcode')('li').text()
         except:
             continue
-        print(f'{imgName}\t{torrentLink}')
+        print(f'{link[0]}\t{imgName}\t{torrentLink}')
         #发现经常会在此卡死，怀疑是读写出了问题，进行错误捕获处理
         try:
             async with aiofiles.open(f'{tag}/{imgName}', 'wb') as imgwriter:
@@ -71,9 +74,10 @@ async def downloadImg(duilie, session, tag):
                 await linkwrite.write(f'{link[-1]}\t{torrentLink}\n')
         except:
             continue
-        #队列为空则等于循环
-        if duilie.empty():
-            break
+        #队列为空则等于循环，发生一直存在的假死问题是因为错误跳过而没有结束队列导致一直等待
+        finally:
+            if duilie.empty():
+                break
 
 #主函数
 async def main():
@@ -88,6 +92,7 @@ async def main():
     async with aiohttp.ClientSession() as session:
         for url in tagDict[number]:
             #创建task
+            print(url)
             task1 = [asyncio.create_task(requestFirstUrl(url, q, session))]
             #8个下载协程，可自行调整，若大于队列深度则请同时调整队列最大深度
             task2 = [asyncio.create_task(downloadImg(q, session, tagDictTmp[number])) for _ in range(8)]
