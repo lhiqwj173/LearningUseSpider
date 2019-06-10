@@ -61,8 +61,8 @@ async def main():
     async with aiohttp.ClientSession() as session:
         for url in fcppv:
             #创建task
-            task1 = [asyncio.create_task(requestFirstUrl(url, q, session))] 
-            task2 = [asyncio.create_task(downloadImg(q, session))]
+            task1 = asyncio.create_task(requestFirstUrl(url, q, session))
+            task2 = asyncio.create_task(downloadImg(q, session))
             await asyncio.wait(task1+task2)
 #python3.7新增接口，无须定义loop，方便你我他
 asyncio.run(main())
