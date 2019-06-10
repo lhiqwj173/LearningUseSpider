@@ -70,7 +70,7 @@ async def downloadImg(duilie, session, tag):
             async with aiofiles.open(f'{tag}/magnet.txt', 'a+') as linkwrite:
                 await linkwrite.write(f'{link[-1]}\t{torrentLink}\n')
         except:
-            continue
+            print("Download Img Error")
         #队列为空则等于循环
         finally:
             if duilie.empty():
