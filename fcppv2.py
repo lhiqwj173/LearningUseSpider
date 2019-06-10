@@ -84,7 +84,7 @@ async def main():
     tagDictTmp = {'1':'fcppv', '2':'blowjob', '3':'footjob', '4':'allInOne', '5':'anime', '6':'chinese'}
 
     #队列最大深度，超过则阻塞
-    q = asyncio.Queue(maxsize=8)
+    q = asyncio.Queue(maxsize=16)
     #aiohttp官方建议只开启单个session用以复用
     async with aiohttp.ClientSession() as session:
         for url in tagDict[number]:
