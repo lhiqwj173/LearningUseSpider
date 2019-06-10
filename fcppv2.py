@@ -74,7 +74,7 @@ async def downloadImg(duilie, session, tag):
                 await linkwrite.write(f'{link[-1]}\t{torrentLink}\n')
         except:
             continue
-        #队列为空则等于循环，发生一直存在的假死问题是因为错误跳过而没有结束队列导致一直等待
+        #队列为空则等于循环
         finally:
             if duilie.empty():
                 break
@@ -99,3 +99,28 @@ async def main():
             await asyncio.wait(task1+task2)
 
 asyncio.run(main())
+
+# python3.6用户请将上方主函数注释，用下方代码
+
+# #主函数
+# async def main(loop):
+#     #创建队列
+#     number = input('请入输想要下载的数字:\n1: fc2ppv\n2: blowjob\n3: footjob\n4: allInOne\n5: anime\n6: chinese\n')
+#     tagDict = {'1':fcppv, '2':blowjob, '3':footjob, '4':allInOne, '5':anime, '6':chinese}
+#     tagDictTmp = {'1':'fcppv', '2':'blowjob', '3':'footjob', '4':'allInOne', '5':'anime', '6':'chinese'}
+
+#     #队列最大深度，超过则阻塞
+#     q = asyncio.Queue(maxsize=8)
+#     #aiohttp官方建议只开启单个session用以复用
+#     async with aiohttp.ClientSession() as session:
+#         for url in tagDict[number]:
+#             #创建task
+#             print(url)
+#             task1 = [loop.create_task(requestFirstUrl(url, q, session))]
+#             #8个下载协程，可自行调整，若大于队列深度则请同时调整队列最大深度
+#             task2 = [loop.create_task(downloadImg(q, session, tagDictTmp[number])) for _ in range(8)]
+#             await asyncio.wait(task1+task2)
+
+# loop = asyncio.get_event_loop()
+# loop.run_until_complete(main(loop))
+
