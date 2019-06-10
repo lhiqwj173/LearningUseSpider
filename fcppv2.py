@@ -63,6 +63,9 @@ async def downloadImg(duilie, session, tag):
             torrentLink = pq(htmlData)('div .blockcode')('li').text()
         except:
             continue
+        finally:
+            if duilie.empty():
+                break     
         print(f'{link[0]}\t{imgName}\t{torrentLink}')
         #发现经常会在此卡死，怀疑是读写出了问题，进行错误捕获处理
         try:
