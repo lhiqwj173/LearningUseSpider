@@ -1,11 +1,23 @@
 import asyncio, aiohttp, aiofiles, re
 from pyquery import PyQuery as pq
 
-# fcppv链接
-fcppv = ['https://www.sehuatang.net/forum.php?mod=forumdisplay&fid=36&typeid=368&filter=typeid&typeid=368&page=%s' %i for i in range(1,51)]
-
 #主页
 urlFormat = 'https://www.sehuatang.net/{}'
+
+#fcppv链接
+fcppv = ['https://www.sehuatang.net/forum.php?mod=forumdisplay&fid=36&typeid=368&filter=typeid&typeid=368&page=%s' %i for i in range(1,51)]
+
+#口
+blowjob = ['https://www.sehuatang.net/forum.php?mod=forumdisplay&fid=36&filter=typeid&typeid=591&page=%s' %i for i in range(1,6)]
+
+#足
+footjob = ['https://www.sehuatang.net/forum.php?mod=forumdisplay&fid=37&filter=typeid&typeid=589&page=%s' %i for i in range(1,6)]
+
+#每日合集
+allInOne = ['https://www.sehuatang.net/forum-106-%s.html' %i for i in range(1,7)]
+
+#动漫
+anime = ['https://www.sehuatang.net/forum-39-%s.html' %i for i in range(1,8)]
 
 #国产链接
 chinese = ['https://www.sehuatang.net/forum-2-%s.html' %i for i in range(1,212)]
@@ -33,22 +45,25 @@ async def downloadImg(duilie, session):
     while True:
         #异步取链接
         link = await duilie.get()
-        htmlData = await fetch(link[0], session)
-        imgLink = pq(htmlData)('.zoom').attr('file')
-        imgName = imgLink.split('/')[-1]
-        #imgName = link[-1].split(' ')[0]
-        torrentLink = pq(htmlData)('div .blockcode')('li').text()
+        try:
+            htmlData = await fetch(link[0], session)
+            imgLink = pq(htmlData)('.zoom').attr('file')
+            imgName = imgLink.split('/')[-1]
+            #imgName = link[-1].split(' ')[0]
+            torrentLink = pq(htmlData)('div .blockcode')('li').text()
+        except:
+            continue
         print(f'{imgName}\t{torrentLink}')
         #发现经常会在此卡死，怀疑是读写出了问题，进行错误捕获处理
         try:
-            async with aiofiles.open(f'fcppv/{imgName}', 'wb') as imgwriter:
+            async with aiofiles.open(f'chinese/{imgName}', 'wb') as imgwriter:
                 #所有异步操作都需await等待
                 data = await fetch(imgLink, session, data=True)
                 await imgwriter.write(data)
-            async with aiofiles.open('fcppv/magnet.txt', 'a+') as linkwrite:
+            async with aiofiles.open('chinese/magnet.txt', 'w+') as linkwrite:
                 await linkwrite.write(f'{link[-1]}\t{torrentLink}\n')
         except:
-            pass
+            continue
         #队列为空则等于循环
         if duilie.empty():
             break
@@ -59,10 +74,10 @@ async def main():
     q = asyncio.Queue(maxsize=16)
     #aiohttp官方建议只开启单个session用以复用
     async with aiohttp.ClientSession() as session:
-        for url in fcppv:
+        for url in chinese:
             #创建task
-            task1 = asyncio.create_task(requestFirstUrl(url, q, session))
-            task2 = asyncio.create_task(downloadImg(q, session))
+            task1 = [asyncio.create_task(requestFirstUrl(url, q, session))]
+            task2 = [asyncio.create_task(downloadImg(q, session))]
             await asyncio.wait(task1+task2)
-#python3.7新增接口，无须定义loop，方便你我他
+
 asyncio.run(main())
