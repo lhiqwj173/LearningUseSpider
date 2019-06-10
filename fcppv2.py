@@ -60,15 +60,9 @@ async def downloadImg(duilie, session, tag):
             imgLink = pq(htmlData)('.zoom').attr('file')
             imgName = imgLink.split('/')[-1]
             #imgName = link[-1].split(' ')[0]
-            torrentLink = pq(htmlData)('div .blockcode')('li').text()
-        except:
-            continue
-        finally:
-            if duilie.empty():
-                break     
-        print(f'{link[0]}\t{imgName}\t{torrentLink}')
+            torrentLink = pq(htmlData)('div .blockcode')('li').text()  
+            print(f'{link[0]}\t{imgName}\t{torrentLink}')
         #发现经常会在此卡死，怀疑是读写出了问题，进行错误捕获处理
-        try:
             async with aiofiles.open(f'{tag}/{imgName}', 'wb') as imgwriter:
                 #所有异步操作都需await等待
                 data = await fetch(imgLink, session, data=True)
