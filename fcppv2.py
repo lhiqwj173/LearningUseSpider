@@ -62,7 +62,7 @@ async def downloadImg(duilie, session, tag):
             imgName = imgLink.split('/')[-1]
             #imgName = link[-1].split(' ')[0]
             torrentLink = pq(htmlData)('div .blockcode')('li').text()  
-            print(f'{link[0]}\t{imgName}\t{torrentLink}')
+            print(f'{link[0]}\t{link[-1]}\t{imgName}\t{torrentLink}')
             #所有异步操作都需await等待
             async with aiofiles.open(f'{tag}/{imgName}', 'wb') as imgwriter:
                 data = await fetch(imgLink, session, data=True)
@@ -79,7 +79,7 @@ async def downloadImg(duilie, session, tag):
         finally:
             if duilie.empty():
                 break
-                
+
 #主函数
 async def main():
     #提示用户选择
@@ -88,7 +88,7 @@ async def main():
     tagDictTmp = {'1':'fcppv', '2':'blowjob', '3':'footjob', '4':'allInOne', '5':'anime', '6':'chinese'}
 
     #创建队列，并指定队列最大深度，超过则阻塞
-    q = asyncio.Queue(maxsize=16)
+    q = asyncio.Queue(maxsize=32)
     #aiohttp官方建议只开启单个session用以复用
     async with aiohttp.ClientSession() as session:
         for url in tagDict[number]: 
@@ -96,7 +96,7 @@ async def main():
             print(url)
             task1 = [asyncio.create_task(requestFirstUrl(url, q, session))]
             #8个下载协程，可自行调整，若大于队列深度则请同时调整队列最大深度
-            task2 = [asyncio.create_task(downloadImg(q, session, tagDictTmp[number])) for _ in range(8)]
+            task2 = [asyncio.create_task(downloadImg(q, session, tagDictTmp[number])) for _ in range(16)]
             await asyncio.wait(task1+task2)
 
 asyncio.run(main())
