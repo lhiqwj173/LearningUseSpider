@@ -26,12 +26,13 @@ chinese = ['https://www.sehuatang.net/forum-2-%s.html' %i for i in range(1,212)]
 async def fetch(url, session, data=False):
     #链接可能假死或超时，捕获跳过
     try:
-        async with session.get(url, proxy='http://127.0.0.1:1080') as response:
+        async with session.get(url, proxy='http://127.0.0.1:1080', timeout=10) as response:
             if data:
                 return await response.read()
             return await response.text()
     except:
-        print("Fetch error")
+        print("fetch url error, maybe timeout or session closed!!!")    
+        
 #请求每一页，将目标链接放入异步队列
 async def requestFirstUrl(url, duilie, session):
     htmlData = await fetch(url, session) 
@@ -44,7 +45,7 @@ async def requestFirstUrl(url, duilie, session):
             await duilie.put([fcppvLink, fcppvTitle])
             #print(f'{fcppvLink}\t{fcppvTitle}')
     except:
-        print("request Put error")
+        print("put error, maybe element not found")
 
 #请求本体页面并查找图片链接与磁力下载
 async def downloadImg(duilie, session, tag):
@@ -62,28 +63,30 @@ async def downloadImg(duilie, session, tag):
             #imgName = link[-1].split(' ')[0]
             torrentLink = pq(htmlData)('div .blockcode')('li').text()  
             print(f'{link[0]}\t{imgName}\t{torrentLink}')
-        #发现经常会在此卡死，怀疑是读写出了问题，进行错误捕获处理
-            async with aiofiles.open(f'{tag}/{imgName}', 'wb') as imgwriter:
-                #所有异步操作都需await等待
-                data = await fetch(imgLink, session, data=True)
-                await imgwriter.write(data)
-            async with aiofiles.open(f'{tag}/magnet.txt', 'a+') as linkwrite:
-                await linkwrite.write(f'{link[-1]}\t{torrentLink}\n')
         except:
             print("Download Img Error")
-        #队列为空则等于循环
+            continue
         finally:
             if duilie.empty():
                 break
+        #所有异步操作都需await等待
+        async with aiofiles.open(f'{tag}/{imgName}', 'wb') as imgwriter:
+            data = await fetch(imgLink, session, data=True)
+            await imgwriter.write(data)
+        async with aiofiles.open(f'{tag}/magnet.txt', 'a+', encoding='utf-8') as linkwrite:
+            await linkwrite.write(f'{link[0]}\t{link[-1]}\t{torrentLink}\n')
+        #队列为空则等于循环
+        if duilie.empty():
+            break
 
 #主函数
 async def main():
-    #创建队列
+    #提示用户选择
     number = input('请入输想要下载的数字:\n1: fc2ppv\n2: blowjob\n3: footjob\n4: allInOne\n5: anime\n6: chinese\n')
     tagDict = {'1':fcppv, '2':blowjob, '3':footjob, '4':allInOne, '5':anime, '6':chinese}
     tagDictTmp = {'1':'fcppv', '2':'blowjob', '3':'footjob', '4':'allInOne', '5':'anime', '6':'chinese'}
 
-    #队列最大深度，超过则阻塞
+    #创建队列，并指定队列最大深度，超过则阻塞
     q = asyncio.Queue(maxsize=16)
     #aiohttp官方建议只开启单个session用以复用
     async with aiohttp.ClientSession() as session:
