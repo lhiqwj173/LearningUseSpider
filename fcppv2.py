@@ -4,6 +4,9 @@ from pyquery import PyQuery as pq
 #主页
 urlFormat = 'https://www.sehuatang.net/{}'
 
+#无码
+noHorse = ['https://www.sehuatang.net/forum-36-%s.html' %i for i in range(1,163)]
+
 #fcppv链接
 fcppv = ['https://www.sehuatang.net/forum.php?mod=forumdisplay&fid=36&typeid=368&filter=typeid&page=%s' %i for i in range(1,51)]
 
@@ -20,7 +23,7 @@ allInOne = ['https://www.sehuatang.net/forum-106-%s.html' %i for i in range(1,7)
 anime = ['https://www.sehuatang.net/forum-39-%s.html' %i for i in range(1,8)]
 
 #国产链接
-chinese = ['https://www.sehuatang.net/forum-2-%s.html' %i for i in range(1,212)]
+chinese = ['https://www.sehuatang.net/forum-2-%s.html' %i for i in range(181,212)]
 
 #页面请求函数，data判定是否返回二进制数据，用以下载图片等文件
 async def fetch(url, session, data=False):
@@ -83,9 +86,9 @@ async def downloadImg(duilie, session, tag):
 #主函数
 async def main():
     #提示用户选择
-    number = input('请入输想要下载的数字:\n1: fc2ppv\n2: blowjob\n3: footjob\n4: allInOne\n5: anime\n6: chinese\n')
-    tagDict = {'1':fcppv, '2':blowjob, '3':footjob, '4':allInOne, '5':anime, '6':chinese}
-    tagDictTmp = {'1':'fcppv', '2':'blowjob', '3':'footjob', '4':'allInOne', '5':'anime', '6':'chinese'}
+    number = input('请入输想要下载的数字:\n1: fc2ppv\n2: blowjob\n3: footjob\n4: allInOne\n5: anime\n6: chinese\n7: noHorse')
+    tagDict = {'1':fcppv, '2':blowjob, '3':footjob, '4':allInOne, '5':anime, '6':chinese, '7':noHorse}
+    tagDictTmp = {'1':'fcppv', '2':'blowjob', '3':'footjob', '4':'allInOne', '5':'anime', '6':'chinese', '7':'noHorse'}
 
     #创建队列，并指定队列最大深度，超过则阻塞
     q = asyncio.Queue(maxsize=32)
