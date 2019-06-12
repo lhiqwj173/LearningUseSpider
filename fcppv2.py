@@ -36,16 +36,16 @@ async def fetch(url, session, data=False):
 #请求每一页，将目标链接放入异步队列
 async def requestFirstUrl(url, duilie, session):
     htmlData = await fetch(url, session) 
-    try:
-        pqa = pq(htmlData)('.s.xst')
-        for _ in pqa:
-            fcppvLink = urlFormat.format(pq(_)('a').attr('href'))
-            fcppvTitle = pq(_)('a').text()
-            #由于放入操作是异步，需使用await，这里一并放入标题，方便后续使用
+    pqa = pq(htmlData)('.s.xst')
+    for _ in pqa:
+        fcppvLink = urlFormat.format(pq(_)('a').attr('href'))
+        fcppvTitle = pq(_)('a').text()
+        #由于放入操作是异步，需使用await，这里一并放入标题，方便后续使用
+        try:
             await duilie.put([fcppvLink, fcppvTitle])
             #print(f'{fcppvLink}\t{fcppvTitle}')
-    except:
-        print("put error, maybe element not found")
+        except:
+            print("put error, maybe element not found")
 
 #请求本体页面并查找图片链接与磁力下载
 async def downloadImg(duilie, session, tag):
@@ -56,19 +56,19 @@ async def downloadImg(duilie, session, tag):
         link = await duilie.get()
         #print(link)
         #解析页面可能为空，捕获跳出
+        htmlData = await fetch(link[0], session)
+        imgLink = pq(htmlData)('.zoom').attr('file')
         try:
-            htmlData = await fetch(link[0], session)
-            imgLink = pq(htmlData)('.zoom').attr('file')
             imgName = imgLink.split('/')[-1]
-            #imgName = link[-1].split(' ')[0]
-            torrentLink = pq(htmlData)('div .blockcode')('li').text()  
-            print(f'{link[0]}\t{imgName}\t{torrentLink}')
-        except:
-            print("Download Img Error")
+        except AttributeError:
+            print("Not found img Link!!!")
             continue
         finally:
             if duilie.empty():
                 break
+        #imgName = link[-1].split(' ')[0]
+        torrentLink = pq(htmlData)('div .blockcode')('li').text()  
+        print(f'{link[0]}\t{imgName}\t{torrentLink}')
         #所有异步操作都需await等待
         async with aiofiles.open(f'{tag}/{imgName}', 'wb') as imgwriter:
             data = await fetch(imgLink, session, data=True)
@@ -90,7 +90,7 @@ async def main():
     q = asyncio.Queue(maxsize=16)
     #aiohttp官方建议只开启单个session用以复用
     async with aiohttp.ClientSession() as session:
-        for url in tagDict[number]:
+        for url in tagDict[number]: 
             #创建task
             print(url)
             task1 = [asyncio.create_task(requestFirstUrl(url, q, session))]
