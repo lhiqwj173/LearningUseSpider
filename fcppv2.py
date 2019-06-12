@@ -60,25 +60,26 @@ async def downloadImg(duilie, session, tag):
         imgLink = pq(htmlData)('.zoom').attr('file')
         try:
             imgName = imgLink.split('/')[-1]
+            #imgName = link[-1].split(' ')[0]
+            torrentLink = pq(htmlData)('div .blockcode')('li').text()  
+            print(f'{link[0]}\t{imgName}\t{torrentLink}')
+            #所有异步操作都需await等待
+            async with aiofiles.open(f'{tag}/{imgName}', 'wb') as imgwriter:
+                data = await fetch(imgLink, session, data=True)
+                await imgwriter.write(data)
+            async with aiofiles.open(f'{tag}/magnet.txt', 'a+', encoding='utf-8') as linkwrite:
+                await linkwrite.write(f'{link[0]}\t{link[-1]}\t{torrentLink}\n')
+        #队列为空则等于循环
         except AttributeError:
             print("Not found img Link!!!")
+            continue
+        except TypeError:
+            print("Not data found, maybe link dead")
             continue
         finally:
             if duilie.empty():
                 break
-        #imgName = link[-1].split(' ')[0]
-        torrentLink = pq(htmlData)('div .blockcode')('li').text()  
-        print(f'{link[0]}\t{imgName}\t{torrentLink}')
-        #所有异步操作都需await等待
-        async with aiofiles.open(f'{tag}/{imgName}', 'wb') as imgwriter:
-            data = await fetch(imgLink, session, data=True)
-            await imgwriter.write(data)
-        async with aiofiles.open(f'{tag}/magnet.txt', 'a+', encoding='utf-8') as linkwrite:
-            await linkwrite.write(f'{link[0]}\t{link[-1]}\t{torrentLink}\n')
-        #队列为空则等于循环
-        if duilie.empty():
-            break
-
+                
 #主函数
 async def main():
     #提示用户选择
