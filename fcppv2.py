@@ -88,7 +88,7 @@ async def main():
     #提示用户选择
     number = input('请入输想要下载的数字:\n1: fc2ppv\n2: blowjob\n3: footjob\n4: allInOne\n5: anime\n6: chinese\n7: noHorse')
     tagDict = {'1':fcppv, '2':blowjob, '3':footjob, '4':allInOne, '5':anime, '6':chinese, '7':noHorse}
-    tagDictTmp = {'1':'fcppv', '2':'blowjob', '3':'footjob', '4':'allInOne', '5':'anime', '6':'chinese', '7':'noHorse'}
+    tagDictTmp = {'1':'fcppv', '2':'blowjob', '3':'footjob', '4':'allInOne', '5':'anime', '6':'chinese', '7':'noHorse\n:'}
 
     #创建队列，并指定队列最大深度，超过则阻塞
     q = asyncio.Queue(maxsize=32)
