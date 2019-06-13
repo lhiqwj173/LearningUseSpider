@@ -86,9 +86,9 @@ async def downloadImg(duilie, session, tag):
 #主函数
 async def main():
     #提示用户选择
-    number = input('请入输想要下载的数字:\n1: fc2ppv\n2: blowjob\n3: footjob\n4: allInOne\n5: anime\n6: chinese\n7: noHorse')
+    number = input('请入输想要下载的数字:\n1: fc2ppv\n2: blowjob\n3: footjob\n4: allInOne\n5: anime\n6: chinese\n7: noHorse\n:')
     tagDict = {'1':fcppv, '2':blowjob, '3':footjob, '4':allInOne, '5':anime, '6':chinese, '7':noHorse}
-    tagDictTmp = {'1':'fcppv', '2':'blowjob', '3':'footjob', '4':'allInOne', '5':'anime', '6':'chinese', '7':'noHorse\n:'}
+    tagDictTmp = {'1':'fcppv', '2':'blowjob', '3':'footjob', '4':'allInOne', '5':'anime', '6':'chinese', '7':'noHorse'}
 
     #创建队列，并指定队列最大深度，超过则阻塞
     q = asyncio.Queue(maxsize=32)
@@ -99,7 +99,7 @@ async def main():
             print(url)
             task1 = [asyncio.create_task(requestFirstUrl(url, q, session))]
             #8个下载协程，可自行调整，若大于队列深度则请同时调整队列最大深度
-            task2 = [asyncio.create_task(downloadImg(q, session, tagDictTmp[number])) for _ in range(16)]
+            task2 = [asyncio.create_task(downloadImg(q, session, tagDictTmp[number])) for _ in range(8)]
             await asyncio.wait(task1+task2)
 
 asyncio.run(main())
