@@ -99,51 +99,6 @@ async def downloadImg(duilie, session, tag):
             if duilie.empty():
                 break
 
-#主函数
-# async def main():
-#     #提示用户选择
-#     tagDict = {'1':fcppv, '2':blowjob, '3':footjob, '4':allInOne, '5':anime, '6':chinese, '7':noHorse, '8': Horse, '9': japanChinese, '10': europe}
-#     tagDictTmp = {'1':'fcppv', '2':'blowjob', '3':'footjob', '4':'allInOne', '5':'anime', '6':'chinese', '7':'noHorse', '8': 'Horse', '9': 'japanChinese', '10': 'europe'}
-#     for k,v in tagDictTmp.items():
-#         print(f'{k}:{v}')
-#     number = input('请入输想要下载的数字:')
-    
-#     #创建队列，并指定队列最大深度，超过则阻塞
-#     q = asyncio.Queue(maxsize=32)
-#     #aiohttp官方建议只开启单个session用以复用
-#     async with aiohttp.ClientSession() as session:
-#         for url in tagDict[number]: 
-#             #创建task
-#             print(url)
-#             task1 = [asyncio.create_task(requestFirstUrl(url, q, session))]
-#             #8个下载协程，可自行调整，若大于队列深度则请同时调整队列最大深度
-#             task2 = [asyncio.create_task(downloadImg(q, session, tagDictTmp[number])) for _ in range(8)]
-#             await asyncio.wait(task1+task2)
-
-# asyncio.run(main())
-
-
-
-# async def main():
-#     #提示用户选择
-#     tagDict = {'fcppv':fcppv, 'blowjob':blowjob, 'footjob':footjob, 'allInOne':allInOne, 'anime5':anime, 'chinese':chinese, 'noHorse':noHorse, 'Horse': Horse, 'japanChinese': japanChinese, 'europe': europe}
-#     #创建队列，并指定队列最大深度，超过则阻塞
-#     q = asyncio.Queue(maxsize=32)
-#     #aiohttp官方建议只开启单个session用以复用
-#     async with aiohttp.ClientSession() as session:
-#         for k,v in tagDict.items():
-#             #创建task
-#             for url in v:
-#                 print(url)
-#                 task1 = [asyncio.create_task(requestFirstUrl(url, q, session))]
-#                 #8个下载协程，可自行调整，若大于队列深度则请同时调整队列最大深度
-#                 task2 = [asyncio.create_task(downloadImg(q, session, k)) for _ in range(16)]
-#                 await asyncio.wait(task1+task2)
-
-# asyncio.run(main())
-
-
-
 async def main(k, v):
     #提示用户选择
     #创建队列，并指定队列最大深度，超过则阻塞
