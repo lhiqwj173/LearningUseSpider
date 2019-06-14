@@ -34,6 +34,9 @@ anime = ['https://www.sehuatang.net/forum-39-%s.html' %i for i in range(1,8)]
 #国产链接
 chinese = ['https://www.sehuatang.net/forum-2-%s.html' %i for i in range(1,212)]
 
+if not os.path.exists('sehuatang'):
+    os.mkdir('sehuatang')
+
 #页面请求函数，data判定是否返回二进制数据，用以下载图片等文件
 async def fetch(url, session, data=False):
     #链接可能假死或超时，捕获跳过
@@ -61,25 +64,25 @@ async def requestFirstUrl(url, duilie, session):
 
 #请求本体页面并查找图片链接与磁力下载
 async def downloadImg(duilie, session, tag):
-    if not os.path.exists(f'{tag}'):
-        os.mkdir(f'{tag}')
+    if not os.path.exists(f'sehuatang/{tag}'):
+        os.mkdir(f'sehuatang/{tag}')
     while True:
-        #异步取链接
+        #get接口也是协程，需await
         link = await duilie.get()
         #print(link)
         #解析页面可能为空，捕获跳出
-        htmlData = await fetch(link[0], session)
-        imgLink = pq(htmlData)('.zoom').attr('file')
         try:
+            htmlData = await fetch(link[0], session)
+            imgLink = pq(htmlData)('.zoom').attr('file')
             imgName = imgLink.split('/')[-1]
             #imgName = link[-1].split(' ')[0]
             torrentLink = pq(htmlData)('div .blockcode')('li').text()  
             print(f'{link[0]}\t{link[-1]}\t{imgName}\t{torrentLink}')
             #所有异步操作都需await等待
-            async with aiofiles.open(f'{tag}/{imgName}', 'wb') as imgwriter:
+            async with aiofiles.open(f'sehuatang/{tag}/{imgName}', 'wb') as imgwriter:
                 data = await fetch(imgLink, session, data=True)
                 await imgwriter.write(data)
-            async with aiofiles.open(f'{tag}/magnet.txt', 'a+', encoding='utf-8') as linkwrite:
+            async with aiofiles.open(f'sehuatang/{tag}/magnet.txt', 'a+', encoding='utf-8') as linkwrite:
                 await linkwrite.write(f'{link[0]}\t{link[-1]}\t{torrentLink}\n')
         #队列为空则等于循环
         except AttributeError:
@@ -87,6 +90,9 @@ async def downloadImg(duilie, session, tag):
             continue
         except TypeError:
             print("Not data found, maybe link dead")
+            continue
+        except:
+            print("Other error, maybe no maybe.....")
             continue
         finally:
             if duilie.empty():
@@ -101,8 +107,6 @@ async def main():
         print(f'{k}:{v}')
     number = input('请入输想要下载的数字:')
     
-    
-
     #创建队列，并指定队列最大深度，超过则阻塞
     q = asyncio.Queue(maxsize=32)
     #aiohttp官方建议只开启单个session用以复用
@@ -118,6 +122,7 @@ async def main():
 asyncio.run(main())
 
 # python3.6用户请将上方主函数注释，用下方代码
+# python3.7的异步asyncio模块修改了不少，方便使用了很多，所以还是建议使用3.7
 
 # #主函数
 # async def main(loop):
