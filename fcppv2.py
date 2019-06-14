@@ -1,5 +1,6 @@
 import asyncio, aiohttp, aiofiles, os
 from pyquery import PyQuery as pq
+from multiprocessing import Process
 
 #主页
 urlFormat = 'https://www.sehuatang.net/{}'
@@ -99,50 +100,69 @@ async def downloadImg(duilie, session, tag):
                 break
 
 #主函数
-async def main():
-    #提示用户选择
-    tagDict = {'1':fcppv, '2':blowjob, '3':footjob, '4':allInOne, '5':anime, '6':chinese, '7':noHorse, '8': Horse, '9': japanChinese, '10': europe}
-    tagDictTmp = {'1':'fcppv', '2':'blowjob', '3':'footjob', '4':'allInOne', '5':'anime', '6':'chinese', '7':'noHorse', '8': 'Horse', '9': 'japanChinese', '10': 'europe'}
-    for k,v in tagDictTmp.items():
-        print(f'{k}:{v}')
-    number = input('请入输想要下载的数字:')
+# async def main():
+#     #提示用户选择
+#     tagDict = {'1':fcppv, '2':blowjob, '3':footjob, '4':allInOne, '5':anime, '6':chinese, '7':noHorse, '8': Horse, '9': japanChinese, '10': europe}
+#     tagDictTmp = {'1':'fcppv', '2':'blowjob', '3':'footjob', '4':'allInOne', '5':'anime', '6':'chinese', '7':'noHorse', '8': 'Horse', '9': 'japanChinese', '10': 'europe'}
+#     for k,v in tagDictTmp.items():
+#         print(f'{k}:{v}')
+#     number = input('请入输想要下载的数字:')
     
+#     #创建队列，并指定队列最大深度，超过则阻塞
+#     q = asyncio.Queue(maxsize=32)
+#     #aiohttp官方建议只开启单个session用以复用
+#     async with aiohttp.ClientSession() as session:
+#         for url in tagDict[number]: 
+#             #创建task
+#             print(url)
+#             task1 = [asyncio.create_task(requestFirstUrl(url, q, session))]
+#             #8个下载协程，可自行调整，若大于队列深度则请同时调整队列最大深度
+#             task2 = [asyncio.create_task(downloadImg(q, session, tagDictTmp[number])) for _ in range(8)]
+#             await asyncio.wait(task1+task2)
+
+# asyncio.run(main())
+
+
+
+# async def main():
+#     #提示用户选择
+#     tagDict = {'fcppv':fcppv, 'blowjob':blowjob, 'footjob':footjob, 'allInOne':allInOne, 'anime5':anime, 'chinese':chinese, 'noHorse':noHorse, 'Horse': Horse, 'japanChinese': japanChinese, 'europe': europe}
+#     #创建队列，并指定队列最大深度，超过则阻塞
+#     q = asyncio.Queue(maxsize=32)
+#     #aiohttp官方建议只开启单个session用以复用
+#     async with aiohttp.ClientSession() as session:
+#         for k,v in tagDict.items():
+#             #创建task
+#             for url in v:
+#                 print(url)
+#                 task1 = [asyncio.create_task(requestFirstUrl(url, q, session))]
+#                 #8个下载协程，可自行调整，若大于队列深度则请同时调整队列最大深度
+#                 task2 = [asyncio.create_task(downloadImg(q, session, k)) for _ in range(16)]
+#                 await asyncio.wait(task1+task2)
+
+# asyncio.run(main())
+
+
+
+async def main(k, v):
+    #提示用户选择
     #创建队列，并指定队列最大深度，超过则阻塞
     q = asyncio.Queue(maxsize=32)
     #aiohttp官方建议只开启单个session用以复用
     async with aiohttp.ClientSession() as session:
-        for url in tagDict[number]: 
-            #创建task
+        #创建task
+        for url in v:
             print(url)
             task1 = [asyncio.create_task(requestFirstUrl(url, q, session))]
             #8个下载协程，可自行调整，若大于队列深度则请同时调整队列最大深度
-            task2 = [asyncio.create_task(downloadImg(q, session, tagDictTmp[number])) for _ in range(8)]
+            task2 = [asyncio.create_task(downloadImg(q, session, k)) for _ in range(8)]
             await asyncio.wait(task1+task2)
 
-asyncio.run(main())
+def m(k, v):
+    asyncio.run(main(k, v))
 
-# python3.6用户请将上方主函数注释，用下方代码
-# python3.7的异步asyncio模块修改了不少，方便使用了很多，所以还是建议使用3.7
-
-# #主函数
-# async def main(loop):
-#     #创建队列
-#     number = input('请入输想要下载的数字:\n1: fc2ppv\n2: blowjob\n3: footjob\n4: allInOne\n5: anime\n6: chinese\n')
-#     tagDict = {'1':fcppv, '2':blowjob, '3':footjob, '4':allInOne, '5':anime, '6':chinese}
-#     tagDictTmp = {'1':'fcppv', '2':'blowjob', '3':'footjob', '4':'allInOne', '5':'anime', '6':'chinese'}
-
-#     #队列最大深度，超过则阻塞
-#     q = asyncio.Queue(maxsize=8)
-#     #aiohttp官方建议只开启单个session用以复用
-#     async with aiohttp.ClientSession() as session:
-#         for url in tagDict[number]:
-#             #创建task
-#             print(url)
-#             task1 = [loop.create_task(requestFirstUrl(url, q, session))]
-#             #8个下载协程，可自行调整，若大于队列深度则请同时调整队列最大深度
-#             task2 = [loop.create_task(downloadImg(q, session, tagDictTmp[number])) for _ in range(8)]
-#             await asyncio.wait(task1+task2)
-
-# loop = asyncio.get_event_loop()
-# loop.run_until_complete(main(loop))
-
+if __name__ == '__main__':
+    tagDict = {'fcppv':fcppv, 'blowjob':blowjob, 'footjob':footjob, 'allInOne':allInOne, 'anime5':anime, 'chinese':chinese, 'noHorse':noHorse, 'Horse': Horse, 'japanChinese': japanChinese, 'europe': europe}
+    p = [Process(target=m, args=(k, v)) for k,v in tagDict.items()]
+    for _ in p:
+        _.start()
