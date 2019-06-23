@@ -64,6 +64,7 @@ async def requestFirstUrl(url, duilie, session):
     except:
         print("Maybe not a url link, Pass")
     finally:
+    #寻找下一页按扭，存在便迭代自已存入链接
         nxtpage = pq(htmlData)('#fd_page_bottom')('.nxt').attr('href')
         if nxtpage is not None:
             print(f'Found next page {urlFormat.format(nxtpage)}')
@@ -125,12 +126,16 @@ def m(k, v):
 
 if __name__ == '__main__':
     tagDict = {'fcppv':fcppv, 'blowjob':blowjob, 'footjob':footjob, 'allInOne':allInOne, 'anime':anime, 'chinese':chinese, 'noHorse':noHorse, 'Horse': Horse, 'japanChinese': japanChinese, 'europe': europe}
+    #计时开始
     starttime = datetime.now()
     print(f'Start at {starttime}')
     #tagDict = {'anime':anime}
+    #创建进程
     p = [Process(target=m, args=(k, v)) for k,v in tagDict.items()]
+    #开始进程
     for _ in p:
         _.start()
+    #阻塞进程，为的是下面计算时间
     for _ in p:
         _.join()
     endtime = datetime.now()
