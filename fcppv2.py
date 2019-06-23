@@ -129,10 +129,10 @@ if __name__ == '__main__':
     print(f'Start at {starttime}')
     #tagDict = {'anime':anime}
     p = [Process(target=m, args=(k, v)) for k,v in tagDict.items()]
-    for _ in p[0:-1]:
+    for _ in p:
         _.start()
-    p[-1].start()
-    p[-1].join()
+    for _ in p:
+        _.join()
     endtime = datetime.now()
     print(f'End at {endtime}\t Spend {endtime-starttime}s')
     
