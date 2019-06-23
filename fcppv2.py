@@ -3,6 +3,8 @@ from pyquery import PyQuery as pq
 from multiprocessing import Process
 from datetime import datetime
 
+#本爬虫使用生产者消费者模型，页数获取为递归方式，消费者最大连接数不超过32为宜
+
 #主页
 urlFormat = 'https://www.sehuatang.net/{}'
 
@@ -43,7 +45,7 @@ if not os.path.exists('sehuatang'):
 async def fetch(url, session, data=False):
     #链接可能假死或超时，捕获跳过
     try:
-        async with session.get(url, timeout=20, proxy='http://127.0.0.1:1080', verify_ssl=False) as response:
+        async with session.get(url, proxy='http://127.0.0.1:1080', verify_ssl=False) as response:
             if data:
                 return await response.read()
             return await response.text()
@@ -88,7 +90,7 @@ async def downloadImg(duilie, session, tag):
                 continue
             #imgName = link[-1].split(' ')[0]
             torrentLink = pq(htmlData)('div .blockcode')('li').text()  
-            print(f'{link[-1]}\t{torrentLink}')
+            #print(f'{link[-1]}\t{torrentLink}')
             #所有异步操作都需await等待
             async with aiofiles.open(f'sehuatang/{tag}/{imgName}', 'wb') as imgwriter:
                 data = await fetch(imgLink, session, data=True)
@@ -107,6 +109,7 @@ async def downloadImg(duilie, session, tag):
             continue
         finally:
             if duilie.empty():
+                print(f"{tag} Task is Done !!!!!!!")
                 break
 
 async def main(k, v):
@@ -118,7 +121,7 @@ async def main(k, v):
         #创建task
         task1 = [asyncio.create_task(requestFirstUrl(v, q, session))]
         #8个下载协程，可自行调整，若大于队列深度则请同时调整队列最大深度
-        task2 = [asyncio.create_task(downloadImg(q, session, k)) for _ in range(8)]
+        task2 = [asyncio.create_task(downloadImg(q, session, k)) for _ in range(2)]
         await asyncio.wait(task1+task2)
 
 def m(k, v):
@@ -126,6 +129,7 @@ def m(k, v):
 
 if __name__ == '__main__':
     tagDict = {'fcppv':fcppv, 'blowjob':blowjob, 'footjob':footjob, 'allInOne':allInOne, 'anime':anime, 'chinese':chinese, 'noHorse':noHorse, 'Horse': Horse, 'japanChinese': japanChinese, 'europe': europe}
+    #tagDict = {'chinese':chinese}
     #计时开始
     starttime = datetime.now()
     print(f'Start at {starttime}')
