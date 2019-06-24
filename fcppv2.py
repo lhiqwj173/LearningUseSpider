@@ -66,18 +66,19 @@ async def requestFirstUrl(url, duilie, session):
     except:
         print("Maybe not a url link, Pass")
     finally:
-    #寻找下一页按扭，存在便迭代自已存入链接
-        nxtpage = pq(htmlData)('#fd_page_bottom')('.nxt').attr('href')
-        if nxtpage is not None:
-            print(f'Found next page {urlFormat.format(nxtpage)}')
-            await requestFirstUrl(urlFormat.format(nxtpage), duilie, session)
+        pass
+    #寻找下一页按扭，存在便迭代自已存入链接，需下载全部内容的请去除注释
+        #nxtpage = pq(htmlData)('#fd_page_bottom')('.nxt').attr('href')
+        #if nxtpage is not None:
+        #    print(f'Found next page {urlFormat.format(nxtpage)}')
+        #    await requestFirstUrl(urlFormat.format(nxtpage), duilie, session)
       
 #请求本体页面并查找图片链接与磁力下载
 async def downloadImg(duilie, session, tag):
     if not os.path.exists(f'sehuatang/{tag}'):
         os.mkdir(f'sehuatang/{tag}')
     while True:
-        #get接口也是协程，需await
+        #get也是异步操作，需await
         link = await duilie.get()
         #print(link)
         #解析页面可能为空，捕获跳出
@@ -143,5 +144,5 @@ if __name__ == '__main__':
     for _ in p:
         _.join()
     endtime = datetime.now()
-    print(f'End at {endtime}\t Spend {endtime-starttime}s')
+    print(f'Start at {starttime}\tEnd at {endtime}\t Spend {endtime-starttime}s')
     
