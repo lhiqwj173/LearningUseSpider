@@ -6,19 +6,16 @@
 # @Last Modified by:   jackyao
 # @Last Modified time: 2018-12-21 16:10:29
 
-
-
-import os
-import asyncio
-import aiohttp
-import aiofiles
-import json
+import os, asyncio, aiohttp, aiofiles, json
 from urllib.parse import quote
 from pyquery import PyQuery as pq
-from multiprocessing import Pool
-if os.name == 'posix':
-    import uvloop
-    asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
+from multiprocessing import Process
+
+
+"""Linux平台可用uvloop事件处理，速度比肩go"""
+#if os.name == 'posix':
+#    import uvloop
+#    asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
 
 keyword=['飞机', '手机', '鸟', '猫', '狗', '青蛙', '马', '船', '卡车', '鹿']
@@ -32,17 +29,17 @@ def genurl(keyword):
             os.mkdir(_)
         """编码url关键字"""
         keyw = quote(_)
-        headurl = 'http://image.baidu.com/search/acjson?tn=resultjson_com&ipn=rj&ct=201326592&is=&fp=result&queryWord={}&cl=2&lm=-1&ie=utf-8&oe=utf-8&adpicid=&st=&z=&ic=&hd=&latest=&copyright=&word={}&s=&se=&tab=&width=&height=&face=&istype=&qc=&nc=1&fr=&expermode=&selected_tags=&pn='.format(keyw, keyw)
-        url2 = ['%s&rn=30' % i for i in range(301) if i%30 == 0]
+        headurl = f'http://image.baidu.com/search/acjson?tn=resultjson_com&ipn=rj&ct=201326592&is=&fp=result&queryWord={keyw}&cl=2&lm=-1&ie=utf-8&oe=utf-8&adpicid=&st=&z=&ic=&hd=&latest=&copyright=&word={keyw}&s=&se=&tab=&width=&height=&face=&istype=&qc=&nc=1&fr=&expermode=&selected_tags=&pn='
+        url2 = ['%s&rn=30' %i for i in range(301) if i%30 == 0]
         """生成url"""
         for _ in url2:
             link.append(headurl+_)
+
 
 genurl(keyword)
 eachPartlen = len(link)//8
 
 newLinkList = [ link[i:i+eachPartlen] for i in range(0, len(link), eachPartlen)]
-
 
 """队列"""
 
@@ -80,29 +77,39 @@ async def getImg(url, sess, q):
 
 async def downloadImg(s, q):
     while True:
-        tmp = await q.get()
-        print("Get {}".format(tmp[0]))
-        async with s.get(tmp[0], proxy='http://127.0.0.1:1081', headers=headers) as res:
-            data = await res.read()
-        async with aiofiles.open('./{}/{}'.format(tmp[1], tmp[0].split('/')[-1]), 'wb') as aiof:
-            await aiof.write(data)
-        if q.empty():
-            break
+        try:
+            tmp = await q.get()
+            print("Get {}".format(tmp[0]))
+            async with s.get(tmp[0], headers=headers) as res:
+                data = await res.read()
+            async with aiofiles.open('./{}/{}'.format(tmp[1], tmp[0].split('/')[-1]), 'wb') as aiof:
+                await aiof.write(data)
+        except OSError:
+            print("无法创建文件名")
+            continue
+        except:
+            print("服务器断开连接，建议降低协程数")
+            continue
+        finally:
+            if q.empty():
+                break
 
-async def main(partLink, loop, q):
+async def main(partLink):
+    q = asyncio.Queue(maxsize=64)
     async with aiohttp.ClientSession() as session:
         """开启8个协程与N个协程"""
-        d = [loop.create_task(downloadImg(session, q)) for _ in range(8)]
-        g = [loop.create_task(getImg(l, session, q)) for l in partLink]
+        d = [asyncio.create_task(downloadImg(session, q)) for _ in range(8)]
+        g = [asyncio.create_task(getImg(l, session, q)) for l in partLink]
 
         await asyncio.wait(g+d)
 
 
 def multiMain(pLink):
-    q = asyncio.Queue(maxsize=8)
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(main(pLink, loop, q))
+    asyncio.run(main(pLink))
 
-
-p = Pool(8)
-p.map(multiMain, newLinkList)
+if __name__ == '__main__':
+    p = [Process(target=multiMain, args=(p,)) for p in newLinkList]
+    for _ in p:
+        _.start()
+    for _ in p:
+        _.join()
