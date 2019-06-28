@@ -53,7 +53,7 @@ async def fetch(url, session, data=False):
         print("fetch url error, maybe timeout or session closed!!!")    
         
 #请求每一页，将目标链接放入异步队列
-async def requestFirstUrl(url, duilie, session):
+async def requestFirstUrl(url, duilie, session, tag):
     htmlData = await fetch(url, session) 
     pqa = pq(htmlData)('.s.xst')
     try:
@@ -68,10 +68,10 @@ async def requestFirstUrl(url, duilie, session):
     finally:
         pass
     #寻找下一页按扭，存在便迭代自已存入链接，需下载全部内容的请去除注释
-        #nxtpage = pq(htmlData)('#fd_page_bottom')('.nxt').attr('href')
-        #if nxtpage is not None:
-        #    print(f'Found next page {urlFormat.format(nxtpage)}')
-        #    await requestFirstUrl(urlFormat.format(nxtpage), duilie, session)
+        nxtpage = pq(htmlData)('#fd_page_bottom')('.nxt').attr('href')
+        if nxtpage is not None:
+            print(f'Found next page {tag}\t{urlFormat.format(nxtpage)}')
+            await requestFirstUrl(urlFormat.format(nxtpage), duilie, session, tag)
       
 #请求本体页面并查找图片链接与磁力下载
 async def downloadImg(duilie, session, tag):
@@ -87,7 +87,7 @@ async def downloadImg(duilie, session, tag):
             imgLink = pq(htmlData)('.zoom').attr('file')
             imgName = imgLink.split('/')[-1]
             if os.path.exists(f'sehuatang/{tag}/{imgName}'):
-                print("Img exists, Pass")
+                #print("Img exists, Pass")
                 continue
             #imgName = link[-1].split(' ')[0]
             torrentLink = pq(htmlData)('div .blockcode')('li').text()  
@@ -116,13 +116,13 @@ async def downloadImg(duilie, session, tag):
 async def main(k, v):
     #提示用户选择
     #创建队列，并指定队列最大深度，超过则阻塞
-    q = asyncio.Queue(maxsize=32)
+    q = asyncio.Queue(maxsize=128)
     #aiohttp官方建议只开启单个session用以复用
     async with aiohttp.ClientSession() as session:
         #创建task
-        task1 = [asyncio.create_task(requestFirstUrl(v, q, session))]
+        task1 = [asyncio.create_task(requestFirstUrl(v, q, session, k))]
         #8个下载协程，可自行调整，若大于队列深度则请同时调整队列最大深度
-        task2 = [asyncio.create_task(downloadImg(q, session, k)) for _ in range(2)]
+        task2 = [asyncio.create_task(downloadImg(q, session, k)) for _ in range(6)]
         await asyncio.wait(task1+task2)
 
 def m(k, v):
