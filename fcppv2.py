@@ -48,9 +48,11 @@ async def fetch(url, session, data=False):
         async with session.get(url, proxy='http://127.0.0.1:1080', verify_ssl=False) as response:
             if data:
                 return await response.read()
-            return await response.text()
+            return await response.text()  
+    except aiohttp.ClientConnectorSSLError as e:
+        assert isinstance(e, ssl.SSLError)
     except:
-        print("fetch url error, maybe timeout or session closed!!!")    
+        print("fetch url error, maybe timeout or session closed!!!")  
         
 #请求每一页，将目标链接放入异步队列
 async def requestFirstUrl(url, duilie, session, tag):
@@ -97,7 +99,7 @@ async def downloadImg(duilie, session, tag):
             #imgName = link[-1].split(' ')[0]
             #print(f'{link[-1]}\t{torrentLink}')
             #所有异步操作都需await等待
-                async with aiofiles.open(f'sehuatang/{tag}/{imgName}', 'wb') as imgwriter:
+                async with aiofiles.open(f'sehuatang/{tag}/{link[-1].split(" ")[0]}_{imgName}', 'wb') as imgwriter:
                     data = await fetch(iname, session, data=True)
                     await imgwriter.write(data)
         #队列为空则等于循环
