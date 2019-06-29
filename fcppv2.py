@@ -84,20 +84,22 @@ async def downloadImg(duilie, session, tag):
         #解析页面可能为空，捕获跳出
         try:
             htmlData = await fetch(link[0], session)
-            imgLink = pq(htmlData)('.zoom').attr('file')
-            imgName = imgLink.split('/')[-1]
-            if os.path.exists(f'sehuatang/{tag}/{imgName}'):
-                #print("Img exists, Pass")
-                continue
-            #imgName = link[-1].split(' ')[0]
-            torrentLink = pq(htmlData)('div .blockcode')('li').text()  
-            #print(f'{link[-1]}\t{torrentLink}')
-            #所有异步操作都需await等待
-            async with aiofiles.open(f'sehuatang/{tag}/{imgName}', 'wb') as imgwriter:
-                data = await fetch(imgLink, session, data=True)
-                await imgwriter.write(data)
+            imgLink = pq(htmlData)('.zoom')
+            torrentLink = pq(htmlData)('div .blockcode')('li').text() 
             async with aiofiles.open(f'sehuatang/{tag}/magnet.txt', 'a+', encoding='utf-8') as linkwrite:
                 await linkwrite.write(f'{link[0]}\t{link[-1]}\t{torrentLink}\n')
+            for _ in imgLink:
+                iname = pq(_).attr('file')
+                imgName = iname.split('/')[-1]
+                if os.path.exists(f'sehuatang/{tag}/{imgName}'):
+                #print("Img exists, Pass")
+                    continue
+            #imgName = link[-1].split(' ')[0]
+            #print(f'{link[-1]}\t{torrentLink}')
+            #所有异步操作都需await等待
+                async with aiofiles.open(f'sehuatang/{tag}/{imgName}', 'wb') as imgwriter:
+                    data = await fetch(iname, session, data=True)
+                    await imgwriter.write(data)
         #队列为空则等于循环
         except AttributeError:
             print("Not found img Link!!!")
@@ -122,7 +124,7 @@ async def main(k, v):
         #创建task
         task1 = [asyncio.create_task(requestFirstUrl(v, q, session, k))]
         #8个下载协程，可自行调整，若大于队列深度则请同时调整队列最大深度
-        task2 = [asyncio.create_task(downloadImg(q, session, k)) for _ in range(6)]
+        task2 = [asyncio.create_task(downloadImg(q, session, k)) for _ in range(4)]
         await asyncio.wait(task1+task2)
 
 def m(k, v):
@@ -130,7 +132,8 @@ def m(k, v):
 
 if __name__ == '__main__':
     tagDict = {'fcppv':fcppv, 'blowjob':blowjob, 'footjob':footjob, 'allInOne':allInOne, 'anime':anime, 'chinese':chinese, 'noHorse':noHorse, 'Horse': Horse, 'japanChinese': japanChinese, 'europe': europe}
-    #tagDict = {'chinese':chinese}
+    #tagDict = {'fcppv':fcppv, 'blowjob':blowjob, 'footjob':footjob, 'allInOne':allInOne, 'anime':anime, 'chinese':chinese, 'noHorse':noHorse, 'Horse': Horse, 'europe': europe}
+    #tagDict = {'japanChinese': japanChinese}
     #计时开始
     starttime = datetime.now()
     print(f'Start at {starttime}')
