@@ -99,12 +99,12 @@ async def downloadImg(duilie, session, tag):
             #imgName = link[-1].split(' ')[0]
             #print(f'{link[-1]}\t{torrentLink}')
             #所有异步操作都需await等待
-                async with aiofiles.open(f'sehuatang/{tag}/{link[-1].split(" ")[0]}_{imgName}', 'wb') as imgwriter:
+                with open(f'sehuatang/{tag}/{link[-1].split(" ")[0]}_{imgName}', 'wb') as imgwriter:
                     data = await fetch(iname, session, data=True)
-                    await imgwriter.write(data)
+                    imgwriter.write(data)
         #队列为空则等于循环
         except AttributeError:
-            print("Not found img Link!!!")
+            #print("Not found img Link!!!")
             continue
         except TypeError:
             print("Not data found, maybe link dead")
