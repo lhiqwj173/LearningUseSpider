@@ -4,7 +4,7 @@
 # @Software: notepad++
 # @Date: 2019-07-02 星期二 11:40
 # @Last Modified by:   anzeme
-# @Last Modified time: 2019-07-02 星期二 13:25
+# @Last Modified time: 2019-07-02 星期二 16:12
 
 import random
 import matplotlib.pyplot as plt
@@ -63,7 +63,7 @@ class morraGame(object):
             self.winOrlost()
             
             #每20次统计结果
-            if self.guessCount%20 == 0:
+            if self.guessCount%(self.times*0.1) == 0:
                 self.writeResult()
                 tmp = self.getNowResult()
                 self.y1.append(tmp[0])
@@ -75,7 +75,7 @@ class morraGame(object):
     def matplotlibShow(self):
         """图表显示保存"""
         x = np.array(self.x) #将数组转换成array，方便加减
-        bar_width=1 #设置柱状图的宽度
+        bar_width=self.times*0.01 #设置柱状图的宽度
         tick_label=[str(_)+'次' for _ in self.x] #x轴标签
 
         #绘制并列柱状图
@@ -89,7 +89,7 @@ class morraGame(object):
         plt.savefig("result.png")
     
 if __name__ == "__main__":
-    a = morraGame('John', 100)
+    a = morraGame('John', 10000)
     a.start()
     a.matplotlibShow()
     #b = morraGame('two', 1000)
