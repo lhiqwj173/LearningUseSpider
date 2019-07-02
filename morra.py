@@ -4,7 +4,7 @@
 # @Software: notepad++
 # @Date: 2019-07-02 星期二 11:40
 # @Last Modified by:   anzeme
-# @Last Modified time: 2019-07-02 星期二 16:12
+# @Last Modified time: 2019-07-02 星期二 16:15
 
 import random
 import matplotlib.pyplot as plt
@@ -13,7 +13,7 @@ import numpy as np
 
 class morraGame(object):
     
-    def __init__(self, name=None, times=100):
+    def __init__(self, name=Nobody, times=100):
         self.times = times  #局数
         self.name = name    #用户名
         self.loseCount = 0  #输次数
