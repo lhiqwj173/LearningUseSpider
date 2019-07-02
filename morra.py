@@ -13,14 +13,13 @@ import numpy as np
 
 class morraGame(object):
     
-    def __init__(self, name=Nobody, times=100):
+    def __init__(self, name='Nobody', times=100):
         self.times = times  #局数
         self.name = name    #用户名
         self.loseCount = 0  #输次数
         self.winCount = 0   #赢次数
         self.middleCount = 0 #平次数
         self.guessCount = 0 #猜次数
-        self.endCount = times+1 #结束次数
         self.x = [] #图表x轴
         self.y1 = []    #图表y轴赢
         self.p2 = []    #图表y轴平
