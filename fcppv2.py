@@ -1,3 +1,11 @@
+#!/usr/bin/env python3.7
+# -*- coding: utf-8 -*-
+# @Author: anzeme
+# @Software: notepad++
+# @Date: 2019-06-25 星期三 22:26
+# @Last Modified by:   anzeme
+# @Last Modified time: 2019-07-02 星期三 22:26
+
 import asyncio, aiohttp, aiofiles, os
 from pyquery import PyQuery as pq
 from multiprocessing import Process
@@ -55,7 +63,7 @@ async def fetch(url, session, data=False):
         print("fetch url error, maybe timeout or session closed!!!")  
         
 #请求每一页，将目标链接放入异步队列
-async def requestFirstUrl(url, duilie, session, tag):
+async def requestFirstUrl(url, duilie, session, tag, c, e):
     htmlData = await fetch(url, session) 
     pqa = pq(htmlData)('.s.xst')
     try:
@@ -68,13 +76,14 @@ async def requestFirstUrl(url, duilie, session, tag):
     except:
         print("Maybe not a url link, Pass")
     finally:
-        pass
     #寻找下一页按扭，存在便迭代自已存入链接，需下载全部内容的请去除注释
-        nxtpage = pq(htmlData)('#fd_page_bottom')('.nxt').attr('href')
-        if nxtpage is not None:
-            print(f'Found next page {tag}\t{urlFormat.format(nxtpage)}')
-            await requestFirstUrl(urlFormat.format(nxtpage), duilie, session, tag)
-      
+        if e < c:
+            e += 1
+            nxtpage = pq(htmlData)('#fd_page_bottom')('.nxt').attr('href')
+            if nxtpage is not None:
+                print(f'Found next page {tag}\t{urlFormat.format(nxtpage)}')
+                await requestFirstUrl(urlFormat.format(nxtpage), duilie, session, tag, c, e)
+        
 #请求本体页面并查找图片链接与磁力下载
 async def downloadImg(duilie, session, tag):
     if not os.path.exists(f'sehuatang/{tag}'):
@@ -93,9 +102,9 @@ async def downloadImg(duilie, session, tag):
             for _ in imgLink:
                 iname = pq(_).attr('file')
                 imgName = iname.split('/')[-1]
-                if os.path.exists(f'sehuatang/{tag}/{imgName}'):
+                #if os.path.exists(f'sehuatang/{tag}/{imgName}'):
                 #print("Img exists, Pass")
-                    continue
+                #    continue
             #imgName = link[-1].split(' ')[0]
             #print(f'{link[-1]}\t{torrentLink}')
             #所有异步操作都需await等待
@@ -121,10 +130,12 @@ async def main(k, v):
     #提示用户选择
     #创建队列，并指定队列最大深度，超过则阻塞
     q = asyncio.Queue(maxsize=128)
+    tmp = 2
+    e = 1
     #aiohttp官方建议只开启单个session用以复用
     async with aiohttp.ClientSession() as session:
         #创建task
-        task1 = [asyncio.create_task(requestFirstUrl(v, q, session, k))]
+        task1 = [asyncio.create_task(requestFirstUrl(v, q, session, k, tmp, e))]
         #8个下载协程，可自行调整，若大于队列深度则请同时调整队列最大深度
         task2 = [asyncio.create_task(downloadImg(q, session, k)) for _ in range(4)]
         await asyncio.wait(task1+task2)
@@ -138,7 +149,7 @@ if __name__ == '__main__':
     #tagDict = {'japanChinese': japanChinese}
     #计时开始
     starttime = datetime.now()
-    print(f'Start at {starttime}')
+    #print(f'Start at {starttime}')
     #tagDict = {'anime':anime}
     #创建进程
     p = [Process(target=m, args=(k, v)) for k,v in tagDict.items()]
