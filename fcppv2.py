@@ -4,9 +4,9 @@
 # @Software: notepad++
 # @Date: 2019-06-25 星期三 22:26
 # @Last Modified by:   anzeme
-# @Last Modified time: 2019-07-02 星期三 22:26
+# @Last Modified time: 2019-07-02 星期四 11:52
 
-import asyncio, aiohttp, aiofiles, os
+import asyncio, aiohttp, aiofiles, os, sys
 from pyquery import PyQuery as pq
 from multiprocessing import Process
 from datetime import datetime
@@ -130,7 +130,10 @@ async def main(k, v):
     #提示用户选择
     #创建队列，并指定队列最大深度，超过则阻塞
     q = asyncio.Queue(maxsize=128)
-    tmp = 2
+    try:
+        tmp = int(sys.argv[1])
+    except IndexError:
+        tmp = 2
     e = 1
     #aiohttp官方建议只开启单个session用以复用
     async with aiohttp.ClientSession() as session:
@@ -161,4 +164,6 @@ if __name__ == '__main__':
         _.join()
     endtime = datetime.now()
     print(f'Start at {starttime}\tEnd at {endtime}\t Spend {endtime-starttime}s')
+    
+    #使用方式： python 色花堂.py 10，后面的数字为可选参数，默认下载2页
     
