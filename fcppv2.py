@@ -6,7 +6,7 @@
 # @Last Modified by:   anzeme
 # @Last Modified time: 2019-07-02 星期四 11:52
 
-import asyncio, aiohttp, aiofiles, os, sys
+import asyncio, aiohttp, aiofiles, os, sys, time
 from pyquery import PyQuery as pq
 from multiprocessing import Process
 from datetime import datetime
@@ -86,8 +86,8 @@ async def requestFirstUrl(url, duilie, session, tag, c, e):
         
 #请求本体页面并查找图片链接与磁力下载
 async def downloadImg(duilie, session, tag):
-    if not os.path.exists(f'sehuatang/{tag}'):
-        os.mkdir(f'sehuatang/{tag}')
+    if not os.path.exists(f'sehuatang/{tag}/{time.strftime("%Y%m%d", time.localtime())}'):
+        os.mkdir(f'sehuatang/{tag}/{time.strftime("%Y%m%d", time.localtime())}')
     while True:
         #get也是异步操作，需await
         link = await duilie.get()
@@ -98,7 +98,7 @@ async def downloadImg(duilie, session, tag):
             imgLink = pq(htmlData)('.zoom')
             torrentLink = pq(htmlData)('div .blockcode')('li').text() 
             async with aiofiles.open(f'sehuatang/{tag}/magnet.txt', 'a+', encoding='utf-8') as linkwrite:
-                await linkwrite.write(f'{link[0]}\t{link[-1]}\t{torrentLink}\n')
+                await linkwrite.write(f'{time.strftime("%Y%m%d", time.localtime())}\t{link[0]}\t{link[-1]}\t{torrentLink}\n')
             for _ in imgLink:
                 iname = pq(_).attr('file')
                 imgName = iname.split('/')[-1]
@@ -108,7 +108,7 @@ async def downloadImg(duilie, session, tag):
             #imgName = link[-1].split(' ')[0]
             #print(f'{link[-1]}\t{torrentLink}')
             #所有异步操作都需await等待
-                with open(f'sehuatang/{tag}/{link[-1].split(" ")[0]}_{imgName}', 'wb') as imgwriter:
+                with open(f'sehuatang/{tag}/{time.strftime("%Y%m%d", time.localtime())}/{link[-1].split(" ")[0]}_{imgName}', 'wb') as imgwriter:
                     data = await fetch(iname, session, data=True)
                     imgwriter.write(data)
         #队列为空则等于循环
