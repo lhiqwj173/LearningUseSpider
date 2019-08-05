@@ -10,23 +10,23 @@ import random
 import matplotlib.pyplot as plt
 plt.rcParams['font.sans-serif']=['SimHei']
 import numpy as np
+from dataclasses import dataclass
 
+@dataclass()
 class morraGame(object):
-    
-    def __init__(self, name='Nobody', times=100):
-        self.times = times  #局数
-        self.name = name    #用户名
-        self.loseCount = 0  #输次数
-        self.winCount = 0   #赢次数
-        self.middleCount = 0 #平次数
-        self.guessCount = 0 #猜次数
-        self.x = [] #图表x轴
-        self.y1 = []    #图表y轴赢
-        self.p2 = []    #图表y轴平
-        self.s3 = []    #图表y轴输
-        self.morraList = ['0','1','2']  #猜拳方式，0石头，1剪刀，2布
-        self.winList = (['0','1'],['1','2'],['2','0'])  #赢条件
-        
+    name: str = 'Nobody'
+    times: int = 100
+    loseCount = 0
+    winCount = 0
+    middleCount = 0
+    guessCount = 0
+    x = []
+    y1 = []
+    p2 = []
+    s3 = []
+    morraList = (['0', '1', '2'])
+    winList = (['0','1'],['1','2'],['2','0'])
+
     def bothGuess(self):
         """双方猜拳"""
         pcChoiceSelf = random.choice(self.morraList) #玩家，考虑手动输入次数太多，也让电脑选
