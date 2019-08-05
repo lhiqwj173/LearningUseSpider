@@ -31,7 +31,7 @@ async def Producter(url, q):
         await q.put([hostname.format(pq(a).attr('href')), pq(a)('img').attr('alt')])
 
     # 下一页判断
-    nxtpage = hostname.format(pq(await w.getHtmlCode())('li.next')('a').attr('href'))
+    nxtpage = 'https://www.tokyo-hot.com/product/'+pq(await w.getHtmlCode())('li.next')('a').attr('href')
     if nxtpage is not None and nxtpage != url:  # 逻辑不为空且不等于当前请求地址
         print(nxtpage)
         await Producter(nxtpage, q)
