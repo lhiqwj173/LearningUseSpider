@@ -8,40 +8,35 @@
 
 import os, asyncio, aiohttp, aiofiles, json
 from urllib.parse import quote
-from pyquery import PyQuery as pq
 from multiprocessing import Process
-
+from tools import Web
 
 """Linux平台可用uvloop事件处理，速度比肩go"""
-#if os.name == 'posix':
+# if os.name == 'posix':
 #    import uvloop
 #    asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
 
-keyword=['飞机', '手机', '鸟', '猫', '狗', '青蛙', '马', '船', '卡车', '鹿']
+keyword = ['飞机', '手机', '鸟', '猫', '狗', '青蛙', '马', '船', '卡车', '鹿']
 link = []
 
-"""生成json链接"""
 def genurl(keyword):
-    """根据关键字创建目录"""
+    """根据关键字创建目录并添加链接"""
     for _ in keyword:
         if not os.path.exists(_):
             os.mkdir(_)
-        """编码url关键字"""
+
         keyw = quote(_)
         headurl = f'http://image.baidu.com/search/acjson?tn=resultjson_com&ipn=rj&ct=201326592&is=&fp=result&queryWord={keyw}&cl=2&lm=-1&ie=utf-8&oe=utf-8&adpicid=&st=&z=&ic=&hd=&latest=&copyright=&word={keyw}&s=&se=&tab=&width=&height=&face=&istype=&qc=&nc=1&fr=&expermode=&selected_tags=&pn='
-        url2 = ['%s&rn=30' %i for i in range(301) if i%30 == 0]
-        """生成url"""
+
+        url2 = ['%s&rn=30' % i for i in range(301) if i % 30 == 0]
         for _ in url2:
             link.append(headurl+_)
-
-
 genurl(keyword)
-eachPartlen = len(link)//8
 
-newLinkList = [ link[i:i+eachPartlen] for i in range(0, len(link), eachPartlen)]
-
-"""队列"""
+#分段，为多进程做准备
+eachPartlen = len(link) // 8
+newLinkList = [link[i:i + eachPartlen] for i in range(0, len(link), eachPartlen)]
 
 headers = {
 
@@ -56,56 +51,47 @@ headers = {
     'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.110 Safari/537.36',
 }
 
-async def getImg(url, sess, q):
-    async with sess.get(url) as res:
-        try:
-            html = await res.text()
-            """json数据类型，取得名称和链接为下载与目录做准备"""
-            j = json.loads(html)
-            for _ in j['data']:
-                    imgurl = _['middleURL']
-                    d = j['queryExt']
-                    #print('Put Link {}\t{}'.format(imgurl, d))
-                    await q.put([imgurl, d])
-        except KeyError:
-            print("Error Link, Pass")
-        except UnicodeDecodeError:
-            print("Url Reqest Error, Pass")
-        except:
-            print("Unkown Error, Pass")
 
+async def Producter(url, q):
+    w = Web(url)
+    try:
+        j = json.loads(await w.getHtmlCode())
+        for _ in j['data']:
+            imgurl = _['middleURL']
+            d = j['queryExt']
+            await q.put([imgurl, d])
+    except KeyError:
+        pass
+    except:
+        pass
 
-async def downloadImg(s, q):
+async def Consumer(q):
     while True:
         try:
             tmp = await q.get()
-            print("Get {}".format(tmp[0]))
-            async with s.get(tmp[0], headers=headers) as res:
-                data = await res.read()
-            async with aiofiles.open('./{}/{}'.format(tmp[1], tmp[0].split('/')[-1]), 'wb') as aiof:
-                await aiof.write(data)
-        except OSError:
-            print("无法创建文件名")
-            continue
+            #print("Get {}".format(tmp[0]))
+            w = Web(tmp[0], headers=headers)
+            print(f'./{tmp[1]}/{tmp[0].split("/")[-1]}')
+
+            async with aiofiles.open(f'./{tmp[1]}/{tmp[0].split("/")[-1]}', 'wb') as aiof:
+                await aiof.write(await w.getByte())
         except:
-            print("服务器断开连接，建议降低协程数")
             continue
         finally:
             if q.empty():
                 break
 
 async def main(partLink):
-    q = asyncio.Queue(maxsize=64)
-    async with aiohttp.ClientSession() as session:
-        """开启8个协程与N个协程"""
-        d = [asyncio.create_task(downloadImg(session, q)) for _ in range(8)]
-        g = [asyncio.create_task(getImg(l, session, q)) for l in partLink]
+    q = asyncio.Queue(maxsize=32)
+    task2 = [asyncio.create_task(Consumer(q)) for _ in range(8)]
+    task1 = [asyncio.create_task(Producter(l, q)) for l in partLink]
 
-        await asyncio.wait(g+d)
+    await asyncio.wait(task1+task2)
 
 
 def multiMain(pLink):
     asyncio.run(main(pLink))
+
 
 if __name__ == '__main__':
     p = [Process(target=multiMain, args=(p,)) for p in newLinkList]

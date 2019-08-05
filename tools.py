@@ -1,4 +1,6 @@
 from dataclasses import dataclass
+from typing import Dict
+
 import aiohttp
 import os
 import aiofiles
@@ -8,6 +10,7 @@ import asyncio
 class Web(object):
     url: str
     proxy: str = 'http://127.0.0.1:1080'
+    headers: Dict = None
 
     @classmethod
     def mkDir(self):
@@ -18,7 +21,7 @@ class Web(object):
         """解析函数"""
         try:
             async with aiohttp.ClientSession() as s:
-                async with s.get(self.url, proxy=self.proxy, verify_ssl=False) as r:
+                async with s.get(self.url, proxy=self.proxy, verify_ssl=False, headers=self.headers) as r:
                     if data:
                         return await r.read()
                     else:
