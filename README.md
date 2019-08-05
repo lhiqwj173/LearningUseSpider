@@ -26,4 +26,7 @@ aiofiles虽然说是异步读写，但听说底层的写入还是同步的，但
 运行:
 ```
 python3 *.py
+
+python3 xvideos.py <tag>
+python3 fc2ppv.py <num>   <num>为从第几页开始爬取
 ```
