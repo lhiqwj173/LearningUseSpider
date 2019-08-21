@@ -14,9 +14,15 @@ from pyquery import PyQuery as pq
 from tools import Web
 from multiprocessing import Pool,Process
 
+cookies = {
+    "__cfduid": "d00908d789c4ace727d36a6249928efa31565789625",
+    "PHPSESSID": "5jd5625obsa8d45jhud5c81762",
+    "existmag": "all",
+}
+
 async def Producter(url, q):
     """生产者函数，迭代解析下一页"""
-    w = Web(url)
+    w = Web(url, cookies=cookies)
 
     htmlCode = await w.getHtmlCode()
     # 解析链接并放入异步队列
@@ -30,13 +36,13 @@ async def Producter(url, q):
             print(nxtpage)
             await Producter(nxtpage, q)
     except TypeError:
-        print("Last Page")
+        print(url+"\tLast Page")
 
 async def Producter2(q, q2):
     while True:
         try:
             boxItem = await q.get()
-            print(boxItem)
+            #print(boxItem)
             w2 = Web(boxItem)
 
             htmlCode = await w2.getHtmlCode()
@@ -73,50 +79,21 @@ async def Consumer(q2, tag):
                 
 
 async def Main(url):
-    q = asyncio.Queue(maxsize=30)
-    q2 = asyncio.Queue(maxsize=30)
+    q = asyncio.Queue()
+    q2 = asyncio.Queue()
 
     tag = url.split('/')[-1]
     task1 = [asyncio.create_task(Producter(url, q))]
-    task2 = [asyncio.create_task(Producter2(q, q2)) for _ in range(30)]
-    task3 = [asyncio.create_task(Consumer(q2, tag)) for tmp in range(30)]
+    task2 = [asyncio.create_task(Producter2(q, q2)) for _ in range(256)]
+    task3 = [asyncio.create_task(Consumer(q2, tag)) for tmp in range(256)]
 
     await asyncio.wait(task1 + task3 + task2)
 
-def MultiprocessStart(url):
-    asyncio.run(Main(url))
 
 if __name__ == "__main__":
     #有码服装
     urlList = [
-        "https://www.busjav.net/genre/5v",
-        "https://www.busjav.net/genre/5u",
-        "https://www.busjav.net/genre/5h",
-        "https://www.busjav.net/genre/5c",
-        "https://www.busjav.net/genre/5b",
-        "https://www.busjav.net/genre/56",
-        "https://www.busjav.net/genre/55",
-        "https://www.busjav.net/genre/50",
-        "https://www.busjav.net/genre/4z",
-        "https://www.busjav.net/genre/4p",
-        "https://www.busjav.net/genre/4n",
-        "https://www.busjav.net/genre/4k",
-        "https://www.busjav.net/genre/4i",
-        "https://www.busjav.net/genre/3i",
-        "https://www.busjav.net/genre/3a",
-        "https://www.busjav.net/genre/2s",
-        "https://www.busjav.net/genre/2m",
-        "https://www.busjav.net/genre/2l",
-        "https://www.busjav.net/genre/28",
-        "https://www.busjav.net/genre/1w",
-        "https://www.busjav.net/genre/18",
-        "https://www.busjav.net/genre/12",
-        "https://www.busjav.net/genre/y",
-        "https://www.busjav.net/genre/v",
-        "https://www.busjav.net/genre/m",
-        "https://www.busjav.net/genre/l",
         "https://www.busjav.net/genre/k",
-        "https://www.busjav.net/genre/j",
         "https://www.busjav.net/genre/i",
         "https://www.busjav.net/genre/a",
         "https://www.busjav.net/genre/9",
@@ -125,5 +102,5 @@ if __name__ == "__main__":
         "https://www.busjav.net/genre/6b",
         "https://www.busjav.net/genre/5x",
     ]
-    p = Pool(8)
-    p.map(MultiprocessStart, urlList)
+    for _ in urlList:
+        asyncio.run(Main(_))

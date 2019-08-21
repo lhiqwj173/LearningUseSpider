@@ -16,12 +16,23 @@ from tools import Web
 # 主页
 try:
     url = sys.argv[1]
+    dirName = f"javbus/{url.split('/')[-1]}"
+    Web.mkDir(dir=dirName)
 except:
     url = 'https://www.busjav.net'
 
+
+
+cookies = {
+    "__cfduid": "d00908d789c4ace727d36a6249928efa31565789625",
+    "PHPSESSID": "5jd5625obsa8d45jhud5c81762",
+    "existmag": "all",
+}
+
+
 async def Producter(url, q):
     """生产者函数，迭代解析下一页"""
-    w = Web(url)
+    w = Web(url, cookies=cookies)
 
     htmlCode = await w.getHtmlCode()
     # 解析链接并放入异步队列
@@ -31,11 +42,11 @@ async def Producter(url, q):
     # 下一页判断
     try:
         nxtpage = "https://www.busjav.net"+pq(htmlCode)('a#next').attr('href')
-        if nxtpage is not None and nxtpage != url:  # 逻辑不为空且不等于当前请求地址
+        if nxtpage != url:  # 逻辑不为空且不等于当前请求地址
             print(nxtpage)
             await Producter(nxtpage, q)
     except TypeError:
-        print("All Done")
+        print(url+"\tLast Page")
 
 async def Producter2(q, q2):
     while True:
@@ -57,9 +68,6 @@ async def Producter2(q, q2):
 async def Consumer(q2):
     """消费者协程，用以下载图片，可多开"""
     while True:
-        dirName = "javbus/女仆"
-        Web.mkDir(dir=dirName)
-
         try:
             imgUrl = await q2.get()
             w3 = Web(imgUrl[1])
@@ -78,12 +86,12 @@ async def Consumer(q2):
                 break
 
 async def Main():
-    q = asyncio.Queue(maxsize=30)
-    q2 = asyncio.Queue(maxsize=30)
+    q = asyncio.Queue()
+    q2 = asyncio.Queue()
 
     task1 = [asyncio.create_task(Producter(url, q))]
-    task2 = [asyncio.create_task(Producter2(q, q2)) for _ in range(30)]
-    task3 = [asyncio.create_task(Consumer(q2)) for tmp in range(30)]
+    task2 = [asyncio.create_task(Producter2(q, q2)) for _ in range(256)]
+    task3 = [asyncio.create_task(Consumer(q2)) for tmp in range(256)]
 
     await asyncio.wait(task1 + task3 + task2)
 
