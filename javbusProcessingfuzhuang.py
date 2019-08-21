@@ -26,7 +26,7 @@ async def Producter(url, q):
     # 下一页判断
     try:
         nxtpage = "https://www.busjav.net"+pq(htmlCode)('a#next').attr('href')
-        if nxtpage is not None and nxtpage != url:  # 逻辑不为空且不等于当前请求地址
+        if nxtpage != url:  # 逻辑不为空且不等于当前请求地址
             print(nxtpage)
             await Producter(nxtpage, q)
     except TypeError:
@@ -72,18 +72,19 @@ async def Consumer(q2, tag):
                 break
                 
 
-async def Main(url, tag):
+async def Main(url):
     q = asyncio.Queue(maxsize=30)
     q2 = asyncio.Queue(maxsize=30)
 
+    tag = url.split('/')[-1]
     task1 = [asyncio.create_task(Producter(url, q))]
     task2 = [asyncio.create_task(Producter2(q, q2)) for _ in range(30)]
     task3 = [asyncio.create_task(Consumer(q2, tag)) for tmp in range(30)]
 
     await asyncio.wait(task1 + task3 + task2)
 
-def MultiprocessStart(url, tag):
-    asyncio.run(Main(url, tag))
+def MultiprocessStart(url):
+    asyncio.run(Main(url))
 
 if __name__ == "__main__":
     #有码服装
@@ -124,10 +125,5 @@ if __name__ == "__main__":
         "https://www.busjav.net/genre/6b",
         "https://www.busjav.net/genre/5x",
     ]
-
-    p = [Process(target=MultiprocessStart, args=(url, url.split('/')[-1])) for url in urlList]
-    for _ in p:
-        _.start()
-    for _ in p:
-        _.join()
-
+    p = Pool(8)
+    p.map(MultiprocessStart, urlList)

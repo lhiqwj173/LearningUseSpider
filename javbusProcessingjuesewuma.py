@@ -72,18 +72,19 @@ async def Consumer(q2, tag):
                 break
                 
 
-async def Main(url, tag):
+async def Main(url):
     q = asyncio.Queue(maxsize=30)
     q2 = asyncio.Queue(maxsize=30)
 
+    tag = url.split('/')[-1]
     task1 = [asyncio.create_task(Producter(url, q))]
     task2 = [asyncio.create_task(Producter2(q, q2)) for _ in range(30)]
     task3 = [asyncio.create_task(Consumer(q2, tag)) for tmp in range(30)]
 
     await asyncio.wait(task1 + task3 + task2)
 
-def MultiprocessStart(url, tag):
-    asyncio.run(Main(url, tag))
+def MultiprocessStart(url):
+    asyncio.run(Main(url))
 
 if __name__ == "__main__":
     #无码角色
@@ -152,10 +153,7 @@ if __name__ == "__main__":
         "https://www.busjav.net/uncensored/genre/gre048",
     ]
 
-    p = [Process(target=MultiprocessStart, args=(url, url.split('/')[-1])) for url in urlList]
-    for _ in p:
-        _.start()
-    for _ in p:
-        _.join()
+    p = Pool(8)
+    p.map(MultiprocessStart, urlList)
 
 
