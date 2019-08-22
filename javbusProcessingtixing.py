@@ -27,7 +27,6 @@ if __name__ == "__main__":
         "https://www.busjav.net/genre/e",
     ]
     for _ in urlList:
-        a = javbus()
-        asyncio.run(a.Main(_))
+        asyncio.run(Main(_))
 
 

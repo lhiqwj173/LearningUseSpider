@@ -81,7 +81,6 @@ if __name__ == "__main__":
     ]
 
     for _ in urlList:
-        a = javbus()
-        asyncio.run(a.Main(_))
+        asyncio.run(Main(_))
 
 
