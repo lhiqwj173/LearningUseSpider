@@ -30,3 +30,20 @@ python3 *.py
 python3 xvideos.py <tag>
 python3 fc2ppv.py <num>   <num>为从第几页开始爬取
 ```
+
+```
+C:\Users\Jackyao\Desktop\test\dist>fc2ppv.exe -h
+usage: fc2ppv.py [-h] [-p n] [-b n n] [-a]
+
+downloader for fc2ppvfanclub picture
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -p n, --page n        which page to crawl(clash with -b -a), example: -p 12
+  -b n n, --between n n
+                        page between a and b(include, clash with -p -a),
+                        example: -b 2 3
+  -a, --all             this flag would download all the page(clash with -p
+                        -b)
+
+```
