@@ -1,45 +1,34 @@
-from dataclasses import dataclass
-from typing import Dict
-
 import aiohttp
 import os
 import aiofiles
 import asyncio
 
-@dataclass()
-class Web(object):
-    url: str
-    proxy: str = 'http://127.0.0.1:1080'
-    headers: Dict = None
 
-    @classmethod
-    def mkDir(self):
-        if not os.path.exists('./download'):
-            os.mkdir("./download")
+proxy = 'http://127.0.0.1:1080'
 
-    async def fetch(self, data=False):
-        """解析函数"""
-        try:
-            async with aiohttp.ClientSession() as s:
-                async with s.get(self.url, proxy=self.proxy, verify_ssl=False, headers=self.headers) as r:
-                    if data:
-                        return await r.read()
-                    else:
-                        return await r.text()
-        except asyncio.TimeoutError:
-            print("Time out")
+def mkDir(dir):
+    """目录创建函数"""
+    if not os.path.exists(dir):
+        os.makedirs(dir)
 
-    async def getHtmlCode(self):
-        return await self.fetch()
+async def fetch(url, **kwargs):
+    """解析函数"""
+    try:
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url, proxy=proxy, headers=kwargs.get('headers'), cookies=kwargs.get('cookies'), verify_ssl=False) as response:
+                if kwargs.get('data') == True:
+                    return await response.read()
+                else:
+                    return await response.text()
+    except asyncio.TimeoutError:
+        print("Timeout")
+    except ConnectionRefusedError:
+        print("ConnectionRefused")
+    except:
+        pass
 
-    async def getByte(self):
-        return await self.fetch(data=True)
+async def getHtmlCode(url, **kwargs):
+    return await fetch(url, **kwargs)
 
-    async def saveFile(self):
-        """文件下载函数"""
-        Web.mkDir()
-        async with aiofiles.open(f'./download/{self.url.split("/")[-1]}', 'wb') as f:
-            await f.write(await self.getByte())
-
-
-
+async def getByte(url):
+    return await fetch(url, data=True)
