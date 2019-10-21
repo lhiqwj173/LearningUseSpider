@@ -1,21 +1,21 @@
 import aiohttp
 import os
-import aiofiles
 import asyncio
 
 
-proxy = 'http://127.0.0.1:1080'
+#apple = {'proxy':'http://127.0.0.1:1080'}
+apple = {}
 
-def mkDir(dir):
+def mk_dir(dir):
     """目录创建函数"""
     if not os.path.exists(dir):
         os.makedirs(dir)
 
-async def fetch(url, **kwargs):
+async def _fetch(url, **kwargs):
     """解析函数"""
     try:
         async with aiohttp.ClientSession() as session:
-            async with session.get(url, proxy=proxy, headers=kwargs.get('headers'), cookies=kwargs.get('cookies'), verify_ssl=False) as response:
+            async with session.get(url,proxy=kwargs.get('proxy'), headers=kwargs.get('headers'), cookies=kwargs.get('cookies'), verify_ssl=False) as response:
                 if kwargs.get('data') == True:
                     return await response.read()
                 else:
@@ -25,10 +25,10 @@ async def fetch(url, **kwargs):
     except ConnectionRefusedError:
         print("ConnectionRefused")
     except:
-        pass
+        print("Unknow Error")
 
-async def getHtmlCode(url, **kwargs):
-    return await fetch(url, **kwargs)
+async def get_html_code(url, **kwargs):
+    return await _fetch(url, **kwargs)
 
-async def getByte(url):
-    return await fetch(url, data=True)
+async def get_byte(url, **kwargs):
+    return await _fetch(url, data=True, **kwargs)
