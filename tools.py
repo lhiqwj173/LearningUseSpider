@@ -2,10 +2,6 @@ import aiohttp
 import os
 import asyncio
 
-
-#apple = {'proxy':'http://127.0.0.1:1080'}
-apple = {}
-
 def mk_dir(dir):
     """目录创建函数"""
     if not os.path.exists(dir):

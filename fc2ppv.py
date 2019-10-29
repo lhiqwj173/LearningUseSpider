@@ -3,9 +3,10 @@
 # @Software: vscode
 # @Date: 2019-06-25 星期三 22:26
 # @Last Modified by:   anzeme
-# @Last Modified time: 2019-07-02 星期三 22:08
+# @Last Modified time: 2019-10-29 18:12:45
 
 import  sys
+from functools import partial
 from pyquery import PyQuery as pq
 from tools import *
 import argparse
@@ -44,13 +45,14 @@ if args.page is None:
 
 # 主页
 hostname = 'http://fc2fans.club{}'
-proxy='http://127.0.0.1:1080'
 
+get_html_code_proxy = partial(get_html_code, proxy="http://127.0.0.1:1080")
+get_byte_proxy = partial(get_byte, proxy="http://127.0.0.1:1080")
 
 async def parseLink(url, duilie):
     """生产者函数，迭代解析下一页"""
     print(f"当前抓取: {url}")
-    r = await get_html_code(url, proxy=proxy)
+    r = await get_html_code_proxy(url)
     # 解析链接并放入异步队列
 
     for a in pq(r)('.title.title-info')('a'):
@@ -73,14 +75,14 @@ async def downloader(duilie, i):
     """消费者协程，用以下载图片，可多开"""
     while True:
         try:
-            r = await get_html_code(await duilie.get(), proxy=proxy)
+            r = await get_html_code_proxy(await duilie.get())
             picUrl = hostname.format(pq(r)(
                 'div.col-sm-8')('#thumbpic').parent().attr('href'))
 
             imgSave = f"download/{picUrl.split('/')[-1]}"
 
             with open(imgSave, 'wb') as file:
-                file.write(await get_byte(picUrl, proxy=proxy))
+                file.write(await get_byte_proxy(picUrl))
             print(imgSave)
         except TypeError:
             pass
