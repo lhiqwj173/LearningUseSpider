@@ -8,14 +8,18 @@
 
 aiohttp是requests的异步架构
 
-aiofiles虽然说是异步读写，但听说底层的写入还是同步的，但一但代码确定使用异步，所有的都得异步
+aiofiles虽然说是异步读写，但听说底层的写入还是同步的
+
+一但代码确定使用异步，所有的都得异步，除了调用运行函数，可以封装成multiprocessing多进程的形式运行
 
 异步框架爬虫基本采取生产者消费者模型，入与取
+
+建议使用python3.7.4以上版本，3.7.3在大量协埕运行下有sslError，确定为版本bug
 
 依赖
 自己安装
 ```
-python3 -m pip install xxxxxx
+python3 -m pip install xxxxxx  xxxxxx
 ```
 使用:
 - 基本都有说明
