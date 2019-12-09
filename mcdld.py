@@ -4,7 +4,7 @@
 # @Email:  foxlowm@gmail.com
 # @Date:   2018-12-12 18:33:21
 # @Last Modified by:   anzeme
-# @Last Modified time: 2019-11-27 22:07:28
+# @Last Modified time: 2019-12-09 16:04:18
 
 import os, asyncio, aiofiles, json
 from urllib.parse import quote
@@ -12,9 +12,9 @@ from multiprocessing import Process
 from tools import *
 
 """Linux平台可用uvloop事件处理，速度比肩go"""
-# if os.name == 'posix':
-#    import uvloop
-#    asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
+if os.name == "posix":
+    import uvloop
+    asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
 
 keyword = ['飞机', '手机', '鸟', '猫', '狗', '青蛙', '马', '船', '卡车', '鹿']
