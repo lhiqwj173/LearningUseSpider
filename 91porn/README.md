@@ -4,7 +4,7 @@
 
 -h 查看帮助
 
--s 查看标签
+-s 查看标签，标签保存在91pornTags里，请一起下载
 
 ```
 python 91porn.py -h
