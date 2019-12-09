@@ -4,13 +4,16 @@
 # @Software: notepad++
 # @Date: 2019-07-04 星期四 12:23
 # @Last Modified by:   anzeme
-# @Last Modified time: 2019-07-02 星期四 11:52
+# @Last Modified time: 2019-12-09 16:03:39
 
 
 import re, sys
 from pyquery import PyQuery as pq
 from tools import *
 import argparse
+if os.name == "posix":
+    import uvloop
+    asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
 # 终端参数解析
 parse = argparse.ArgumentParser(
