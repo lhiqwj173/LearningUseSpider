@@ -3,13 +3,16 @@
 # @Software: vscode
 # @Date: 2019-06-25 星期三 22:26
 # @Last Modified by:   anzeme
-# @Last Modified time: 2019-10-29 18:12:45
+# @Last Modified time: 2019-11-24 01:44:05
 
-import  sys
+import sys,os
 from functools import partial
 from pyquery import PyQuery as pq
 from tools import *
 import argparse
+if os.name == "posix":
+    import uvloop
+    asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
 parse = argparse.ArgumentParser(
     description="downloader for fc2ppvfanclub picture, default runtime crawl the first page", prog='fc2ppv.py')
@@ -46,8 +49,8 @@ if args.page is None:
 # 主页
 hostname = 'http://fc2fans.club{}'
 
-get_html_code_proxy = partial(get_html_code, proxy="http://127.0.0.1:1080")
-get_byte_proxy = partial(get_byte, proxy="http://127.0.0.1:1080")
+get_html_code_proxy = partial(get_html_code, proxy="http://127.0.0.1:10801")
+get_byte_proxy = partial(get_byte, proxy="http://127.0.0.1:10801")
 
 async def parseLink(url, duilie):
     """生产者函数，迭代解析下一页"""
