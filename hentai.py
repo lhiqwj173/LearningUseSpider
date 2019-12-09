@@ -3,13 +3,16 @@
 # @Software: vscode
 # @Date: 2019-06-25 星期三 22:26
 # @Last Modified by:   anzeme
-# @Last Modified time: 2019-07-02 星期三 22:08
+# @Last Modified time: 2019-12-09 16:02:00
 
 import sys
 from pyquery import PyQuery as pq
 from tools import *
 import re
 import argparse
+if os.name == "posix":
+    import uvloop
+    asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
 VIDEOSEARCH = re.compile('http[s]?:\/\/.*\.mp4')
 
