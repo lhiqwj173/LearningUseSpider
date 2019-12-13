@@ -17,9 +17,8 @@ aiofiles虽然说是异步读写，但听说底层的写入还是同步的
 建议使用python3.7.4以上版本，3.7.3在大量协程运行下有sslError，确定为版本bug
 
 依赖
-自己安装
 ```
-python3 -m pip install -r re.txt
+python3 -m pip install -r requirements.txt
 ```
 使用:
 - 基本都有说明
