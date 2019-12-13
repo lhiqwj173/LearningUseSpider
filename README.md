@@ -19,7 +19,7 @@ aiofiles虽然说是异步读写，但听说底层的写入还是同步的
 依赖
 自己安装
 ```
-python3 -m pip install xxxxxx  xxxxxx
+python3 -m pip install -r re.txt
 ```
 使用:
 - 基本都有说明
