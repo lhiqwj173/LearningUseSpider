@@ -3,7 +3,7 @@
 # @Email: foxlowm@gmail.com
 # @Date:   2019-10-25 20:51:38
 # @Last Modified by:   anzeme
-# @Last Modified time: 2019-11-09 21:09:06
+# @Last Modified time: 2019-12-13 12:47:37
 
 import aiohttp,os,asyncio,aiofiles
 from multiprocessing import Pool
@@ -13,11 +13,6 @@ if os.name == "posix":
     asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 #import torch.multiprocessing
 #torch.multiprocessing.set_sharing_strategy('file_system')
-
-
-headers = {
-    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.97 Safari/537.36',
-   }
 
 # 国产番剧ID与名称
 with open('bangumi_id_name_chinese', 'rb') as file:
@@ -30,9 +25,9 @@ async def test_score(k, v, u=None):
     async with aiohttp.ClientSession() as session:
         # 获取网页返回
         if u is not None:
-            r = await session.get(u,headers=headers)
+            r = await session.get(u)
         else:
-            r = await session.get(url,headers=headers)
+            r = await session.get(url)
 
         # 取得json源码
         t = await r.json()

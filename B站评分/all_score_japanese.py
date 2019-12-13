@@ -3,7 +3,7 @@
 # @Email: foxlowm@gmail.com
 # @Date:   2019-10-25 20:51:38
 # @Last Modified by:   anzeme
-# @Last Modified time: 2019-11-09 21:26:43
+# @Last Modified time: 2019-12-13 12:46:45
 
 import aiohttp,os,aiofiles
 import asyncio
@@ -11,13 +11,9 @@ import json
 import re
 from multiprocessing import Process,Pool
 import pickle
-os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 if os.name == "posix":
     import uvloop
     asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
-#import torch.multiprocessing
-#torch.multiprocessing.set_sharing_strategy('file_system')
-
 
 #首页评论，用于取得下一页cursor，可替换成任何番剧评分首页，建议运行两次，首次无法获取
 #start_url = ''
