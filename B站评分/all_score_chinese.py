@@ -17,8 +17,7 @@ if os.name == "posix":
 
 headers = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.97 Safari/537.36',
-    'cookie': "_uuid=8517C427-0923-25AE-7F73-16FF37F76E8E51378infoc; buvid3=956856A9-B429-415E-964D-22A6A15E3F58155817infoc; LIVE_BUVID=AUTO3115704691532713; sid=kg3bevfk; CURRENT_FNVAL=16; stardustvideo=1; rpdid=|(u))~|R~Jul0J'ul~|lkk|Rl; UM_distinctid=16db7111c018df-02d0fac4019226-67e1b3f-1fa400-16db7111c027e7; finger=14af842e; bp_t_offset_7413759=152887091842430877; im_notify_type_10090394=0; CURRENT_QUALITY=112; im_notify_type_24910090=0; bp_t_offset_10090394=318352296060303542; im_notify_type_13478463=0; bp_t_offset_13478463=318306623378964000; im_notify_type_4072319=2; bp_t_offset_24910090=318577919283719036; DedeUserID=4072319; DedeUserID__ckMd5=2f93856fe6dfc315; SESSDATA=f00eb8b9%2C1575811389%2C0c09fab1; bili_jct=ca84f90a3afd5b78e8efdbef20d029bf; bp_t_offset_4072319=319774071968684421"
-}
+   }
 
 # 国产番剧ID与名称
 with open('bangumi_id_name_chinese', 'rb') as file:
